@@ -8,24 +8,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
-- "Why DriftGuard?" and "Not a linter, not a migration tool" sections in README
-- Real CLI output from OpenAPI demo in README
-- v0.1.0 scope completed milestone in roadmap
-- CONTRIBUTING.md with development setup, code style, and PR guidelines
-- CODE_OF_CONDUCT.md (Contributor Covenant v2.1)
-- SECURITY.md with vulnerability reporting process
-- ROADMAP.md with versioned milestone plan through v1.0.0
-- GitHub issue templates: bug report (YAML form) and feature request
-- GitHub release notes template
-- Semantic versioning section in README
-- Separate installation section (pip, uv, poetry) in README
-- GitHub release notes for v0.1.0
-- v0.1.1 milestone on GitHub
-- Expanded PyPI keywords and classifiers for discoverability
+- **Config v2:** `project_name`, `environment`, `owner_team`, `notification` settings, `schema_version` for migration
+- **Config CLI:** `driftguard config validate` and `driftguard config print` subcommands
+- **Config migration:** automatic v0 -> v1 config schema migration on load
+- **Snapshot v2:** `created_by`, `git_commit_sha`, `branch_name`, `source_hash`, `collector_version`, `environment`, `tags`, `description` metadata fields
+- **Diff engine:** fuzzy field rename detection (SequenceMatcher, threshold 0.5)
+- **Diff events:** `DefaultValueChanged`, `ConstraintChanged`, `IndexChanged`, `ForeignKeyChanged`, `PrimaryKeyChanged`
+- **Diff engine:** constraint diffing (PK, unique, FK, max_length, pattern changes)
+- **Policy modes:** `strict`, `lenient`, `backward_compatible`, `forward_compatible` evaluation modes
+- **Policy rules:** default value, constraint, FK, PK, and index change classification
+- Enterprise config template with all available options
+- Community files: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md
+- GitHub issue templates, release notes template, v0.1.1 milestone
+- README: "Why DriftGuard?", installation options, real CLI output, versioning section
 
 ### Changed
 - CHANGELOG format tightened to release-based structure
-- Package description improved for PyPI
+- Package description and keywords improved for PyPI discoverability
+- Config validation errors now include file path context
+- Tests increased from 152 to 179
 
 ## [0.1.0] - 2025-04-25
 
