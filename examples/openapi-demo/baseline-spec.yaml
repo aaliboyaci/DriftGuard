@@ -1,0 +1,43 @@
+openapi: "3.0.3"
+info:
+  title: Pet Store API
+  version: "1.0.0"
+paths: {}
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+        - status
+      properties:
+        id:
+          type: integer
+          description: Unique pet identifier
+        name:
+          type: string
+          description: Pet name
+        status:
+          type: string
+          description: Availability status
+          enum:
+            - available
+            - pending
+            - sold
+        tag:
+          type: string
+          description: Optional tag
+
+    Owner:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        phone:
+          type: string

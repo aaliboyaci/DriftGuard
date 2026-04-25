@@ -1,0 +1,9 @@
+version: "1"
+snapshot_dir: .driftguard/snapshots
+sources:
+  - name: petstore-api
+    type: openapi
+    path: baseline-spec.yaml
+report_formats:
+  - terminal
+  - markdown

@@ -1,0 +1,32 @@
+name: DriftGuard Self-Check Demo
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install DriftGuard
+        run: pip install -e .
+
+      - name: Run drift check on OpenAPI demo
+        working-directory: examples/openapi-demo
+        run: |
+          driftguard diff --baseline baseline --current current --config driftguard.yaml
+          driftguard report --baseline baseline --current current --format markdown --output drift-report.md --config driftguard.yaml
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: examples/openapi-demo/drift-report.md

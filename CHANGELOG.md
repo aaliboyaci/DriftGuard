@@ -46,6 +46,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Markdown reporter: CI artifact / PR comment format
 - HTML reporter: standalone styled report page
 - 152 total tests passing (11 CLI + 7 reporter tests added)
+- GitHub Actions CI workflow: lint + type-check + test across Python 3.11/3.12/3.13
+- DriftGuard self-check demo workflow for PRs with artifact upload
+- examples/openapi-demo: Pet Store API baseline vs current with breaking changes
+- examples/file-schema-demo: CSV schema drift detection demo
 
 ### Fixed
 - pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`

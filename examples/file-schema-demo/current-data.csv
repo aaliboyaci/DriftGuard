@@ -1,0 +1,4 @@
+id,full_name,email,amount,status
+1,Alice Smith,alice@example.com,100.50,active
+2,Bob Jones,bob@example.com,250.75,inactive
+3,Charlie Brown,,50.00,active

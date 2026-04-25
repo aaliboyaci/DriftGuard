@@ -1,0 +1,9 @@
+version: "1"
+snapshot_dir: .driftguard/snapshots
+sources:
+  - name: export-data
+    type: csv
+    path: baseline-data.csv
+report_formats:
+  - terminal
+  - markdown

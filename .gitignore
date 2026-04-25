@@ -2,6 +2,7 @@
 CLAUDE.md
 tasks.md
 .claude/
+.driftguard/
 
 # Python
 __pycache__/
