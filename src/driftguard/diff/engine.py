@@ -302,6 +302,36 @@ def _diff_constraints(resource_name: str, fname: str, baseline: FieldDef, curren
             )
         )
 
+    # Min value changed
+    b_min = bc.min_value if bc else None
+    c_min = cc.min_value if cc else None
+    if b_min != c_min:
+        events.append(
+            ConstraintChanged(
+                resource_name=resource_name,
+                description=f"Min value changed: {resource_name}.{fname} ({b_min} -> {c_min})",
+                field_name=fname,
+                constraint_type="min_value",
+                old_value=str(b_min) if b_min is not None else None,
+                new_value=str(c_min) if c_min is not None else None,
+            )
+        )
+
+    # Max value changed
+    b_max = bc.max_value if bc else None
+    c_max = cc.max_value if cc else None
+    if b_max != c_max:
+        events.append(
+            ConstraintChanged(
+                resource_name=resource_name,
+                description=f"Max value changed: {resource_name}.{fname} ({b_max} -> {c_max})",
+                field_name=fname,
+                constraint_type="max_value",
+                old_value=str(b_max) if b_max is not None else None,
+                new_value=str(c_max) if c_max is not None else None,
+            )
+        )
+
     # Pattern changed
     b_pat = bc.pattern if bc else None
     c_pat = cc.pattern if cc else None
