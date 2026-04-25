@@ -2,55 +2,31 @@
 
 All notable changes to DriftGuard will be documented in this file.
 
-Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
-- 200-step development roadmap (Faz 10-29) covering stabilization, config v2, snapshot v2, diff engine enhancements, policy modes, new collectors (MongoDB, MySQL, BigQuery, etc.), event/streaming support, API contract diff, file schema support, storage backends, CLI UX, reporter improvements, CI/CD integrations, PR experience, performance, security, observability, and enterprise governance
+- "Why DriftGuard?" and "Not a linter" sections in README
+- Real CLI output from OpenAPI demo in README
+- v0.1.0 scope completed milestone in roadmap
+
+### Changed
+- CHANGELOG format tightened to release-based structure
 
 ## [0.1.0] - 2025-04-25
 
+First public release. Full MVP with semantic diff engine, policy engine, CLI, and multi-source collectors.
+
 ### Added
-
-#### Core
-- Pydantic v2 schema models: `ContractSnapshot`, `ResourceSchema`, `FieldDef`, `FieldConstraint`, `SourceType`
-- Semantic diff engine: compares snapshots producing field/resource-level `DiffEvent`s
-- Policy engine: classifies changes as breaking/warning/info with type widening detection
-- Diff event types: `FieldAdded`, `FieldRemoved`, `FieldRenamed`, `TypeChanged`, `NullableChanged`, `RequiredChanged`, `EnumValuesChanged`, `ResourceAdded`, `ResourceRemoved`
-
-#### CLI
-- Typer-based CLI with commands: `init`, `snapshot`, `diff`, `check`, `report`
-- CI gate: `check` command exits non-zero on breaking changes
-- `--version` flag and auto source collector dispatch
-
-#### Collectors
-- `BaseCollector` abstract interface for pluggable adapters
-- `PostgresCollector`: SQLAlchemy-based introspection with PK, FK, unique constraints
-- `OpenApiCollector`: OpenAPI 3.x / Swagger 2.x component schema extraction
-- `JsonSchemaCollector`: JSON Schema file parsing with type/nullable/enum/default
-- `CsvCollector`: CSV header + sample data type inference
-
-#### Reporters
-- Terminal reporter: Rich-based colored table output
-- JSON reporter: machine-readable structured output
-- Markdown reporter: CI artifact / PR comment format
-- HTML reporter: standalone styled report page
-
-#### Infrastructure
-- `LocalStore`: versioned JSON snapshot read/write/list/delete
-- `DriftGuardConfig`: YAML config with source definitions and policy overrides
-- GitHub Actions CI: lint + type-check + test across Python 3.11/3.12/3.13
-- Self-check demo workflow for PRs with artifact upload
-- 152 tests passing (unit, golden, CLI, reporter)
-
-#### Documentation
-- Architecture guide with pipeline overview and extension points
-- CLI usage reference with all commands and options
-- Policy rules documentation with severity levels and overrides
-- Adapter development guide for adding new source collectors
-- README with badges, example output, roadmap, contributing guide
-
-#### Examples
-- openapi-demo: Pet Store API baseline vs current with breaking changes
-- file-schema-demo: CSV schema drift detection demo
+- **Core:** Pydantic v2 schema models, semantic diff engine, policy engine with risk classification
+- **CLI:** Typer-based commands (`init`, `snapshot`, `diff`, `check`, `report`) with CI gate
+- **Collectors:** PostgreSQL (SQLAlchemy), OpenAPI 3.x / Swagger 2.x, JSON Schema, CSV
+- **Reporters:** Terminal (Rich), JSON, Markdown, HTML
+- **Store:** Versioned local JSON snapshot storage
+- **Config:** YAML-based source definitions and policy overrides
+- **CI:** GitHub Actions matrix across Python 3.11 / 3.12 / 3.13
+- **Docs:** Architecture, CLI usage, policy rules, adapter development guides
+- **Examples:** OpenAPI demo, CSV file schema demo
+- **Tests:** 152 tests (unit, golden, CLI, reporter)
