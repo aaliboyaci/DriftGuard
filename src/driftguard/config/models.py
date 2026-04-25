@@ -38,6 +38,7 @@ class DriftGuardConfig(BaseModel):
     """Top-level DriftGuard configuration."""
 
     version: str = "1"
+    project_name: str | None = Field(default=None, description="Project name for reports and snapshots")
     snapshot_dir: str = ".driftguard/snapshots"
     sources: list[SourceConfig] = Field(default_factory=list)
     policy_overrides: list[PolicyOverride] = Field(default_factory=list)

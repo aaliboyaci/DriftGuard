@@ -18,9 +18,14 @@ class TestDriftGuardConfig:
     def test_defaults(self) -> None:
         c = DriftGuardConfig()
         assert c.version == "1"
+        assert c.project_name is None
         assert c.snapshot_dir == ".driftguard/snapshots"
         assert c.sources == []
         assert c.report_formats == ["terminal"]
+
+    def test_project_name(self) -> None:
+        c = DriftGuardConfig(project_name="my-service")
+        assert c.project_name == "my-service"
 
     def test_with_sources(self) -> None:
         c = DriftGuardConfig(
