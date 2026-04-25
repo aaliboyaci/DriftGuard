@@ -8,25 +8,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
-- **Config v2:** `project_name`, `environment`, `owner_team`, `notification` settings, `schema_version` for migration
+- **Config v2:** `project_name`, `environment`, `owner_team`, `notification` settings, `schema_version` with auto-migration
 - **Config CLI:** `driftguard config validate` and `driftguard config print` subcommands
-- **Config migration:** automatic v0 -> v1 config schema migration on load
-- **Snapshot v2:** `created_by`, `git_commit_sha`, `branch_name`, `source_hash`, `collector_version`, `environment`, `tags`, `description` metadata fields
+- **Snapshot v2:** `created_by`, `git_commit_sha`, `branch_name`, `source_hash`, `collector_version`, `environment`, `tags`, `description` metadata fields with backward compatibility
+- **Snapshot store:** checksum (SHA-256), gzip export/import, retention-based cleanup, snapshot info
+- **Snapshot CLI:** `driftguard snapshots list`, `snapshots show`, `snapshots delete` subcommands
 - **Diff engine:** fuzzy field rename detection (SequenceMatcher, threshold 0.5)
 - **Diff events:** `DefaultValueChanged`, `ConstraintChanged`, `IndexChanged`, `ForeignKeyChanged`, `PrimaryKeyChanged`
-- **Diff engine:** constraint diffing (PK, unique, FK, max_length, pattern changes)
+- **Diff engine:** constraint diffing (PK, unique, FK, max_length, min_value, max_value, pattern)
+- **Diff CLI:** `--only-breaking` and `--resource` filter flags
 - **Policy modes:** `strict`, `lenient`, `backward_compatible`, `forward_compatible` evaluation modes
-- **Policy rules:** default value, constraint, FK, PK, and index change classification
-- Enterprise config template with all available options
+- **Policy rules:** default value, constraint, FK, PK, index, and numeric range change classification
+- **Collectors:** MySQL (SQLAlchemy), SQLite (SQLAlchemy + tests), YAML data file inference
 - Community files: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md
-- GitHub issue templates, release notes template, v0.1.1 milestone
-- README: "Why DriftGuard?", installation options, real CLI output, versioning section
+- GitHub issue templates (bug report, feature request), release notes template
+- Enterprise config template with all available options
+- README: "Why DriftGuard?", "Not a linter", installation options, real CLI output, versioning section
+- v0.1.1 GitHub milestone, v0.1.0 GitHub release notes
 
 ### Changed
 - CHANGELOG format tightened to release-based structure
-- Package description and keywords improved for PyPI discoverability
+- Package description, keywords, and classifiers improved for PyPI
 - Config validation errors now include file path context
-- Tests increased from 152 to 179
+- Tests increased from 152 to 190
 
 ## [0.1.0] - 2025-04-25
 
