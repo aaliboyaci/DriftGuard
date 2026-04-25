@@ -127,3 +127,56 @@ class TestLocalStore:
         snap = _make_snapshot("feature/branch")
         store.save(snap)
         assert store.exists("feature/branch")
+
+    def test_checksum(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        store = LocalStore(tmp_path / "snapshots")
+        store.save(_make_snapshot("test"))
+        cs = store.checksum("test")
+        assert len(cs) == 64  # SHA-256 hex
+
+    def test_checksum_not_found(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        store = LocalStore(tmp_path / "snapshots")
+        with pytest.raises(FileNotFoundError):
+            store.checksum("nope")
+
+    def test_export_and_import(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        store = LocalStore(tmp_path / "snapshots")
+        store.save(_make_snapshot("original"))
+        export_path = tmp_path / "export.json"
+        store.export_snapshot("original", export_path)
+        assert export_path.exists()
+
+        store2 = LocalStore(tmp_path / "snapshots2")
+        imported = store2.import_snapshot(export_path)
+        assert imported.name == "original"
+
+    def test_export_compressed(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        store = LocalStore(tmp_path / "snapshots")
+        store.save(_make_snapshot("test"))
+        out = store.export_snapshot("test", tmp_path / "export.json", compress=True)
+        assert str(out).endswith(".gz")
+        assert out.exists()
+
+        store2 = LocalStore(tmp_path / "snapshots2")
+        imported = store2.import_snapshot(out)
+        assert imported.name == "test"
+
+    def test_cleanup(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        import time
+
+        store = LocalStore(tmp_path / "snapshots")
+        for i in range(5):
+            store.save(_make_snapshot(f"snap{i}"))
+            time.sleep(0.05)  # ensure different mtimes
+        removed = store.cleanup(keep=2)
+        assert len(removed) == 3
+        assert len(store.list_snapshots()) == 2
+
+    def test_snapshot_info(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        store = LocalStore(tmp_path / "snapshots")
+        store.save(_make_snapshot("test"))
+        info = store.snapshot_info("test")
+        assert info["name"] == "test"
+        assert info["resource_count"] == 1
+        assert info["size_bytes"] > 0
+        assert len(str(info["checksum"])) == 64

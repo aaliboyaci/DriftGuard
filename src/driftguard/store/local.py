@@ -6,6 +6,9 @@ Default location: .driftguard/snapshots/
 
 from __future__ import annotations
 
+import gzip
+import hashlib
+import json
 from pathlib import Path
 
 from driftguard.schema.models import ContractSnapshot
@@ -56,3 +59,65 @@ class LocalStore:
             path.unlink()
             return True
         return False
+
+    def checksum(self, name: str) -> str:
+        """Return SHA-256 checksum of a snapshot file."""
+        path = self._snapshot_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Snapshot not found: {path}")
+        content = path.read_bytes()
+        return hashlib.sha256(content).hexdigest()
+
+    def export_snapshot(self, name: str, output_path: str | Path, compress: bool = False) -> Path:
+        """Export a snapshot to a file, optionally gzip-compressed."""
+        path = self._snapshot_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Snapshot not found: {path}")
+        out = Path(output_path)
+        content = path.read_bytes()
+        if compress:
+            out = out.with_suffix(".json.gz") if not str(out).endswith(".gz") else out
+            out.write_bytes(gzip.compress(content))
+        else:
+            out.write_bytes(content)
+        return out
+
+    def import_snapshot(self, input_path: str | Path) -> ContractSnapshot:
+        """Import a snapshot from a file (supports gzip)."""
+        inp = Path(input_path)
+        if not inp.exists():
+            raise FileNotFoundError(f"File not found: {inp}")
+        if str(inp).endswith(".gz"):
+            content = gzip.decompress(inp.read_bytes()).decode("utf-8")
+        else:
+            content = inp.read_text(encoding="utf-8")
+        snapshot = ContractSnapshot.model_validate_json(content)
+        self.save(snapshot)
+        return snapshot
+
+    def cleanup(self, keep: int = 5) -> list[str]:
+        """Remove old snapshots, keeping only the N most recent by file modification time."""
+        if not self.base_dir.exists():
+            return []
+        files = sorted(self.base_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        removed: list[str] = []
+        for f in files[keep:]:
+            removed.append(f.stem)
+            f.unlink()
+        return removed
+
+    def snapshot_info(self, name: str) -> dict[str, str | int]:
+        """Return metadata about a stored snapshot."""
+        path = self._snapshot_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Snapshot not found: {path}")
+        stat = path.stat()
+        content = path.read_text(encoding="utf-8")
+        data = json.loads(content)
+        return {
+            "name": name,
+            "size_bytes": stat.st_size,
+            "checksum": hashlib.sha256(content.encode()).hexdigest(),
+            "resource_count": len(data.get("resources", [])),
+            "created_at": data.get("created_at", ""),
+        }
