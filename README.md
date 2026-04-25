@@ -14,6 +14,15 @@ DriftGuard is a Python CLI for detecting schema drift and breaking contract chan
 
 ---
 
+## Try It Now
+
+```bash
+pip install driftguard
+driftguard demo
+```
+
+This runs a self-contained demo — no config, no database, no files needed. You'll see a simulated API schema change with breaking changes detected.
+
 ## How It Works
 
 ```

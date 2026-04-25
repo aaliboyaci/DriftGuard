@@ -68,6 +68,107 @@ def init(
 
 
 @app.command()
+def demo() -> None:
+    """Run a self-contained demo showing DriftGuard in action."""
+    from driftguard.reporters.terminal import TerminalReporter
+    from driftguard.schema.models import FieldDef, ResourceSchema
+
+    console.print("\n[bold]DriftGuard Demo[/bold]")
+    console.print("Simulating a Pet Store API schema change...\n")
+
+    # --- Baseline ---
+    console.print("[dim]1. Creating baseline snapshot (v1.0)...[/dim]")
+    baseline = ContractSnapshot(
+        name="baseline",
+        resources=[
+            ResourceSchema(
+                name="Pet",
+                source_type=SourceType.OPENAPI,
+                fields=[
+                    FieldDef(name="id", field_type="integer", required=True),
+                    FieldDef(name="name", field_type="string", required=True),
+                    FieldDef(
+                        name="status", field_type="string", required=True, enum_values=["available", "pending", "sold"]
+                    ),
+                    FieldDef(name="tag", field_type="string", required=False),
+                ],
+            ),
+            ResourceSchema(
+                name="Owner",
+                source_type=SourceType.OPENAPI,
+                fields=[
+                    FieldDef(name="id", field_type="integer", required=True),
+                    FieldDef(name="email", field_type="string", required=True),
+                    FieldDef(name="phone", field_type="string", required=False),
+                ],
+            ),
+        ],
+    )
+
+    # --- Current (with breaking changes) ---
+    console.print("[dim]2. Creating current snapshot (v1.1) with schema changes...[/dim]")
+    console.print("[dim]   - Pet.tag removed[/dim]")
+    console.print("[dim]   - Pet.category added (required)[/dim]")
+    console.print("[dim]   - Pet.status enum: +archived[/dim]")
+    console.print("[dim]   - Owner.id type: integer -> string[/dim]")
+    console.print("[dim]   - Owner.address added (optional)[/dim]")
+
+    current = ContractSnapshot(
+        name="current",
+        resources=[
+            ResourceSchema(
+                name="Pet",
+                source_type=SourceType.OPENAPI,
+                fields=[
+                    FieldDef(name="id", field_type="integer", required=True),
+                    FieldDef(name="name", field_type="string", required=True),
+                    FieldDef(
+                        name="status",
+                        field_type="string",
+                        required=True,
+                        enum_values=["available", "pending", "sold", "archived"],
+                    ),
+                    FieldDef(name="category", field_type="string", required=True),
+                ],
+            ),
+            ResourceSchema(
+                name="Owner",
+                source_type=SourceType.OPENAPI,
+                fields=[
+                    FieldDef(name="id", field_type="string", required=True),
+                    FieldDef(name="email", field_type="string", required=True),
+                    FieldDef(name="phone", field_type="string", required=False),
+                    FieldDef(name="address", field_type="string", required=False),
+                ],
+            ),
+        ],
+    )
+
+    # --- Diff + Policy ---
+    console.print("\n[dim]3. Running semantic diff...[/dim]\n")
+    diff_result = compute_diff(baseline, current)
+    policy_result = evaluate(diff_result)
+
+    reporter = TerminalReporter(console)
+    reporter.report(diff_result, policy_result)
+
+    if policy_result.has_breaking:
+        console.print(
+            f"\n[red bold]BREAKING CHANGES DETECTED: {policy_result.breaking_count} breaking change(s)[/red bold]"
+        )
+        console.print("[red]CI check would fail (exit code 1)[/red]")
+    else:
+        console.print("\n[green]No breaking changes. CI check would pass.[/green]")
+
+    console.print(
+        f"\n[dim]Summary: {len(diff_result.events)} changes | "
+        f"{policy_result.breaking_count} breaking | "
+        f"{policy_result.warning_count} warning | "
+        f"{policy_result.info_count} info[/dim]"
+    )
+
+
+@app.command()
 def snapshot(
     name: str = typer.Option(..., "--name", "-n", help="Snapshot name"),
     config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
