@@ -55,19 +55,30 @@ driftguard check --baseline baseline --current current
 
 ## Example Output
 
-```
-Schema Drift Report: baseline -> current
-Changes: 8 | Breaking: 3 | Warnings: 4 | Info: 1
+Real output from `driftguard check` on the [OpenAPI demo](examples/openapi-demo/):
 
-┌────────────┬──────────┬─────────────────────────────────────────┬──────────────────────────────────────┐
-│ Severity   │ Resource │ Change                                  │ Reason                               │
-├────────────┼──────────┼─────────────────────────────────────────┼──────────────────────────────────────┤
-│ [X] BREAK  │ users    │ Field removed: users.email (string)     │ Consumers expecting this field fail  │
-│ [X] BREAK  │ users    │ Field added: users.phone (string)       │ Adding required field may break      │
-│ [!] WARN   │ users    │ Enum values changed: users.status       │ Strict consumers may not handle      │
-│ [!] WARN   │ orders   │ Type changed: orders.amount (int→num)   │ Type widened; some may accept        │
-│ [i] INFO   │ payments │ Resource added: payments                │ Backward compatible                  │
-└────────────┴──────────┴─────────────────────────────────────────┴──────────────────────────────────────┘
+```
+$ driftguard check --baseline baseline --current current
+
+Schema Drift Report: baseline -> current
+Changes: 5 | Breaking: 2 | Warnings: 2 | Info: 1
+
++-------------------------------------------------------------------------------------------------------------------+
+| Severity   | Resource   | Change                                   | Reason                                      |
+|------------+------------+------------------------------------------+---------------------------------------------|
+|  INFO      | Owner      | Field added: Owner.address (string)      | Adding an optional field is backward        |
+|            |            |                                          | compatible                                  |
+| [!]        | Owner      | Type changed: Owner.id (integer ->       | Type widened from integer to string;        |
+| WARNING    |            | string)                                  | some consumers may accept this              |
+| [X]        | Pet        | Field removed: Pet.tag (string)          | Consumers expecting this field will fail    |
+| BREAKING   |            |                                          |                                             |
+| [X]        | Pet        | Field added: Pet.category (string)       | Adding a required field may break existing  |
+| BREAKING   |            |                                          | producers/consumers                         |
+| [!]        | Pet        | Enum values changed: Pet.status          | Enum values added: archived; strict         |
+| WARNING    |            |                                          | consumers may not handle new values         |
++-------------------------------------------------------------------------------------------------------------------+
+
+BREAKING CHANGES DETECTED: 2 breaking change(s)
 ```
 
 ## Architecture
