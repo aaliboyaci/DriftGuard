@@ -18,3 +18,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Example directories: postgres-demo, openapi-demo, file-schema-demo
 - py.typed marker for PEP 561 type stub support
 - README.md with problem statement, features, quick start, architecture, risk classification table
+- Core schema models: `ContractSnapshot`, `ResourceSchema`, `FieldDef`, `FieldConstraint`, `SourceType`
+- Diff event models: `FieldAdded`, `FieldRemoved`, `FieldRenamed`, `TypeChanged`, `NullableChanged`, `RequiredChanged`, `EnumValuesChanged`, `ResourceAdded`, `ResourceRemoved`
+- `DiffResult` container with filtering by category and resource
+- Policy models: `PolicyDecision`, `PolicyResult`, `Severity` with CI exit code support
+- 42 unit tests covering all core models (schema, diff events, policy)
+
+### Fixed
+- pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`
