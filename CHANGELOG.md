@@ -7,6 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
-- **2025-04-25:** CLAUDE.md - Project guidance file for Claude Code
-- **2025-04-25:** tasks.md - 42-step implementation plan across 9 phases
-- **2025-04-25:** CHANGELOG.md - Project changelog initialized
+- pyproject.toml with hatchling build, all core + dev dependencies
+- .pre-commit-config.yaml with ruff and mypy hooks
+- MIT LICENSE
+- ruff (lint/format) and mypy (strict type-check) configuration in pyproject.toml
+- pytest configuration with testpaths and verbose output
+- CLI entrypoint: `driftguard` command via `driftguard.cli.app:app`
