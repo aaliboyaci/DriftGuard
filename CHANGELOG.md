@@ -38,6 +38,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `PostgresCollector`: SQLAlchemy-based introspection with PK, FK, unique constraint detection
 - Test fixtures: sample JSON Schema, OpenAPI YAML, CSV files
 - 134 total tests passing
+- Typer CLI with commands: `init`, `snapshot`, `diff`, `check`, `report`
+- `--version` flag and auto source collector dispatch
+- CI gate: `check` command exits non-zero on breaking changes
+- Terminal reporter: Rich-based colored table output
+- JSON reporter: machine-readable structured output
+- Markdown reporter: CI artifact / PR comment format
+- HTML reporter: standalone styled report page
+- 152 total tests passing (11 CLI + 7 reporter tests added)
 
 ### Fixed
 - pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`
