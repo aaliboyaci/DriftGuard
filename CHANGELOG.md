@@ -23,6 +23,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `DiffResult` container with filtering by category and resource
 - Policy models: `PolicyDecision`, `PolicyResult`, `Severity` with CI exit code support
 - 42 unit tests covering all core models (schema, diff events, policy)
+- Semantic diff engine: compares two snapshots producing field/resource-level DiffEvents
+- Policy engine: evaluates DiffEvents with risk rules (widening transitions, nullable, enum, required)
+- Golden test fixtures: baseline + breaking + clean snapshot pairs
+- 95 total tests: diff engine (18), policy engine (18), golden tests (17), model tests (42)
 
 ### Fixed
 - pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`
