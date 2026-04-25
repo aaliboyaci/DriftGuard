@@ -21,6 +21,16 @@ class Severity(str, Enum):
     INFO = "info"
 
 
+class PolicyMode(str, Enum):
+    """Policy evaluation mode controlling strictness."""
+
+    DEFAULT = "default"
+    STRICT = "strict"
+    LENIENT = "lenient"
+    BACKWARD_COMPATIBLE = "backward_compatible"
+    FORWARD_COMPATIBLE = "forward_compatible"
+
+
 class PolicyDecision(BaseModel):
     """Risk assessment for a single DiffEvent."""
 

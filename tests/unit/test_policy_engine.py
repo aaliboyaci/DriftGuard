@@ -5,7 +5,7 @@ from driftguard.diff.events import (
     FieldRenamed,
 )
 from driftguard.policy.engine import evaluate
-from driftguard.policy.models import Severity
+from driftguard.policy.models import PolicyMode, Severity
 from driftguard.schema.models import (
     ContractSnapshot,
     FieldDef,
@@ -129,6 +129,58 @@ class TestPolicyEngineRules:
         )
         decision = _evaluate_event(event)
         assert decision.severity == Severity.BREAKING
+
+
+class TestPolicyModes:
+    def test_strict_promotes_warning_to_breaking(self) -> None:
+        """In strict mode, type widening (normally warning) becomes breaking."""
+        base = _snap("v1", [_res("t", [_field("amount", "integer")])])
+        curr = _snap("v2", [_res("t", [_field("amount", "number")])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.STRICT)
+        assert result.has_breaking
+
+    def test_strict_promotes_info_to_warning(self) -> None:
+        """In strict mode, optional field added (normally info) becomes warning."""
+        base = _snap("v1", [_res("t", [_field("id")])])
+        curr = _snap("v2", [_res("t", [_field("id"), _field("phone", required=False)])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.STRICT)
+        assert result.warning_count == 1
+
+    def test_lenient_demotes_breaking_to_warning(self) -> None:
+        """In lenient mode, field removal (normally breaking) becomes warning."""
+        base = _snap("v1", [_res("t", [_field("id"), _field("email")])])
+        curr = _snap("v2", [_res("t", [_field("id")])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.LENIENT)
+        assert not result.has_breaking
+        assert result.warning_count == 1
+
+    def test_lenient_keeps_resource_removed_breaking(self) -> None:
+        """In lenient mode, resource removal stays breaking."""
+        base = _snap("v1", [_res("users", [_field("id")])])
+        curr = _snap("v2", [])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.LENIENT)
+        assert result.has_breaking
+
+    def test_backward_compatible_strict_on_changes(self) -> None:
+        """Backward-compat mode promotes warnings to breaking."""
+        base = _snap("v1", [_res("t", [_field("amount", "integer")])])
+        curr = _snap("v2", [_res("t", [_field("amount", "number")])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.BACKWARD_COMPATIBLE)
+        assert result.has_breaking
+
+    def test_forward_compatible_warns_on_additions(self) -> None:
+        """Forward-compat mode warns on field additions."""
+        base = _snap("v1", [_res("t", [_field("id")])])
+        curr = _snap("v2", [_res("t", [_field("id"), _field("phone", required=False)])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.FORWARD_COMPATIBLE)
+        assert result.warning_count == 1
+
+    def test_default_mode_same_as_no_mode(self) -> None:
+        base = _snap("v1", [_res("t", [_field("id")])])
+        curr = _snap("v2", [_res("t", [_field("id"), _field("phone", required=False)])])
+        default_result = evaluate(compute_diff(base, curr), mode=PolicyMode.DEFAULT)
+        no_mode_result = evaluate(compute_diff(base, curr))
+        assert default_result.info_count == no_mode_result.info_count
 
 
 class TestPolicyEngineExitCode:

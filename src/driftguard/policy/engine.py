@@ -1,7 +1,7 @@
 """Policy engine for risk classification.
 
 Evaluates DiffEvents against a set of rules and produces PolicyDecisions
-with severity levels (breaking/warning/info).
+with severity levels (breaking/warning/info). Supports multiple policy modes.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from driftguard.diff.events import (
     RequiredChanged,
     TypeChanged,
 )
-from driftguard.policy.models import PolicyDecision, PolicyResult, Severity
+from driftguard.policy.models import PolicyDecision, PolicyMode, PolicyResult, Severity
 
 # Type transitions that are considered widening (potentially safe)
 WIDENING_TRANSITIONS: set[tuple[str, str]] = {
@@ -27,14 +27,31 @@ WIDENING_TRANSITIONS: set[tuple[str, str]] = {
 }
 
 
-def evaluate(diff_result: DiffResult) -> PolicyResult:
+def evaluate(diff_result: DiffResult, mode: PolicyMode = PolicyMode.DEFAULT) -> PolicyResult:
     """Evaluate all diff events and produce policy decisions."""
-    decisions = [_evaluate_event(event) for event in diff_result.events]
+    decisions = [_evaluate_event(event, mode) for event in diff_result.events]
     return PolicyResult(decisions=decisions)
 
 
-def _evaluate_event(event: DiffEvent) -> PolicyDecision:
+def _evaluate_event(event: DiffEvent, mode: PolicyMode = PolicyMode.DEFAULT) -> PolicyDecision:
     """Evaluate a single diff event and return its policy decision."""
+    decision = _evaluate_event_default(event)
+
+    # Apply mode adjustments
+    if mode == PolicyMode.STRICT:
+        decision = _apply_strict(decision)
+    elif mode == PolicyMode.LENIENT:
+        decision = _apply_lenient(decision)
+    elif mode == PolicyMode.BACKWARD_COMPATIBLE:
+        decision = _apply_backward_compatible(decision)
+    elif mode == PolicyMode.FORWARD_COMPATIBLE:
+        decision = _apply_forward_compatible(decision)
+
+    return decision
+
+
+def _evaluate_event_default(event: DiffEvent) -> PolicyDecision:
+    """Evaluate using default policy rules."""
     match event.category:
         case ChangeCategory.RESOURCE_REMOVED:
             return PolicyDecision(
@@ -70,6 +87,96 @@ def _evaluate_event(event: DiffEvent) -> PolicyDecision:
             return _evaluate_required_changed(event)
         case ChangeCategory.ENUM_VALUES_CHANGED:
             return _evaluate_enum_changed(event)
+        case ChangeCategory.DEFAULT_VALUE_CHANGED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.INFO,
+                reason="Default value changed; may affect new records but existing data is unaffected",
+            )
+        case ChangeCategory.CONSTRAINT_CHANGED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.WARNING,
+                reason="Constraint changed; may affect data validation behavior",
+            )
+        case ChangeCategory.FOREIGN_KEY_CHANGED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.BREAKING,
+                reason="Foreign key relationship changed; referential integrity may be affected",
+            )
+        case ChangeCategory.PRIMARY_KEY_CHANGED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.BREAKING,
+                reason="Primary key changed; row identity and joins are affected",
+            )
+        case ChangeCategory.INDEX_CHANGED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.INFO,
+                reason="Index changed; may affect query performance but not correctness",
+            )
+        case _:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.INFO,
+                reason="Unclassified change",
+            )
+
+
+def _apply_strict(decision: PolicyDecision) -> PolicyDecision:
+    """Strict mode: promote warnings to breaking."""
+    if decision.severity == Severity.WARNING:
+        return PolicyDecision(
+            event=decision.event,
+            severity=Severity.BREAKING,
+            reason=f"[strict] {decision.reason}",
+        )
+    if decision.severity == Severity.INFO:
+        return PolicyDecision(
+            event=decision.event,
+            severity=Severity.WARNING,
+            reason=f"[strict] {decision.reason}",
+        )
+    return decision
+
+
+def _apply_lenient(decision: PolicyDecision) -> PolicyDecision:
+    """Lenient mode: demote breaking to warning (except resource removal)."""
+    if decision.severity == Severity.BREAKING:
+        if decision.event.category != ChangeCategory.RESOURCE_REMOVED:
+            return PolicyDecision(
+                event=decision.event,
+                severity=Severity.WARNING,
+                reason=f"[lenient] {decision.reason}",
+            )
+    return decision
+
+
+def _apply_backward_compatible(decision: PolicyDecision) -> PolicyDecision:
+    """Backward-compatible mode: only additions are safe, everything else is strict."""
+    if decision.event.category in (ChangeCategory.RESOURCE_ADDED, ChangeCategory.FIELD_ADDED):
+        if decision.severity == Severity.INFO:
+            return decision
+    if decision.severity == Severity.WARNING:
+        return PolicyDecision(
+            event=decision.event,
+            severity=Severity.BREAKING,
+            reason=f"[backward-compat] {decision.reason}",
+        )
+    return decision
+
+
+def _apply_forward_compatible(decision: PolicyDecision) -> PolicyDecision:
+    """Forward-compatible mode: only removals are safe, additions may be breaking."""
+    if decision.event.category in (ChangeCategory.FIELD_ADDED,):
+        return PolicyDecision(
+            event=decision.event,
+            severity=Severity.WARNING,
+            reason=f"[forward-compat] {decision.reason}",
+        )
+    return decision
 
 
 def _evaluate_field_added(event: DiffEvent) -> PolicyDecision:
