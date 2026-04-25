@@ -103,6 +103,8 @@ def diff(
     baseline: str = typer.Option(..., "--baseline", "-b", help="Baseline snapshot name"),
     current: str = typer.Option(..., "--current", "-c", help="Current snapshot name"),
     config: str = typer.Option("driftguard.yaml", "--config", help="Config file path"),
+    only_breaking: bool = typer.Option(False, "--only-breaking", help="Show only breaking changes"),
+    resource: str = typer.Option("", "--resource", "-r", help="Filter by resource name"),
 ) -> None:
     """Compare two snapshots and show semantic differences."""
     cfg = _load_config(config)
@@ -113,13 +115,22 @@ def diff(
 
     diff_result = compute_diff(base_snap, curr_snap)
 
+    # Filter by resource if specified
+    if resource:
+        diff_result.events = [e for e in diff_result.events if e.resource_name == resource]
+
     if not diff_result.has_changes:
         console.print("[green]No schema changes detected.[/green]")
         return
 
+    from driftguard.policy.models import Severity
     from driftguard.reporters.terminal import TerminalReporter
 
     policy_result = evaluate(diff_result)
+
+    # Filter to only breaking if requested
+    if only_breaking:
+        policy_result.decisions = [d for d in policy_result.decisions if d.severity == Severity.BREAKING]
     reporter = TerminalReporter(console)
     reporter.report(diff_result, policy_result)
 
