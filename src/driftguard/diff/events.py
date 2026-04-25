@@ -24,6 +24,11 @@ class ChangeCategory(str, Enum):
     NULLABLE_CHANGED = "nullable_changed"
     REQUIRED_CHANGED = "required_changed"
     ENUM_VALUES_CHANGED = "enum_values_changed"
+    DEFAULT_VALUE_CHANGED = "default_value_changed"
+    CONSTRAINT_CHANGED = "constraint_changed"
+    INDEX_CHANGED = "index_changed"
+    FOREIGN_KEY_CHANGED = "foreign_key_changed"
+    PRIMARY_KEY_CHANGED = "primary_key_changed"
 
 
 class DiffEvent(BaseModel):
@@ -107,6 +112,50 @@ class EnumValuesChanged(DiffEvent):
     field_name: str
     added_values: list[str] = Field(default_factory=list)
     removed_values: list[str] = Field(default_factory=list)
+
+
+class DefaultValueChanged(DiffEvent):
+    """A field's default value was changed."""
+
+    category: ChangeCategory = ChangeCategory.DEFAULT_VALUE_CHANGED
+    field_name: str
+    old_default: str | None
+    new_default: str | None
+
+
+class ConstraintChanged(DiffEvent):
+    """A field's constraint was changed (max_length, pattern, etc.)."""
+
+    category: ChangeCategory = ChangeCategory.CONSTRAINT_CHANGED
+    field_name: str
+    constraint_type: str
+    old_value: str | None
+    new_value: str | None
+
+
+class IndexChanged(DiffEvent):
+    """An index was added, removed, or modified on a resource."""
+
+    category: ChangeCategory = ChangeCategory.INDEX_CHANGED
+    index_name: str | None = None
+    change_type: str = Field(description="added, removed, or modified")
+
+
+class ForeignKeyChanged(DiffEvent):
+    """A foreign key relationship was changed."""
+
+    category: ChangeCategory = ChangeCategory.FOREIGN_KEY_CHANGED
+    field_name: str
+    old_reference: str | None
+    new_reference: str | None
+
+
+class PrimaryKeyChanged(DiffEvent):
+    """A primary key was changed."""
+
+    category: ChangeCategory = ChangeCategory.PRIMARY_KEY_CHANGED
+    old_fields: list[str] = Field(default_factory=list)
+    new_fields: list[str] = Field(default_factory=list)
 
 
 class DiffResult(BaseModel):

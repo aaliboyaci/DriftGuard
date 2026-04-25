@@ -4,6 +4,7 @@ from driftguard.diff.engine import compute_diff
 from driftguard.diff.events import ChangeCategory
 from driftguard.schema.models import (
     ContractSnapshot,
+    FieldConstraint,
     FieldDef,
     ResourceSchema,
     SourceType,
@@ -171,6 +172,80 @@ class TestDiffEngineRename:
         result = compute_diff(base, curr)
         renames = result.events_by_category(ChangeCategory.FIELD_RENAMED)
         assert len(renames) == 0
+
+
+class TestDiffEngineNewEvents:
+    def test_default_value_changed(self) -> None:
+        base = _snap("v1", [_res("t", [_field("status", default="active")])])
+        curr = _snap("v2", [_res("t", [_field("status", default="pending")])])
+        result = compute_diff(base, curr)
+        changed = result.events_by_category(ChangeCategory.DEFAULT_VALUE_CHANGED)
+        assert len(changed) == 1
+
+    def test_default_value_added(self) -> None:
+        base = _snap("v1", [_res("t", [_field("name")])])
+        curr = _snap("v2", [_res("t", [_field("name", default="unknown")])])
+        result = compute_diff(base, curr)
+        changed = result.events_by_category(ChangeCategory.DEFAULT_VALUE_CHANGED)
+        assert len(changed) == 1
+
+    def test_default_value_removed(self) -> None:
+        base = _snap("v1", [_res("t", [_field("name", default="test")])])
+        curr = _snap("v2", [_res("t", [_field("name")])])
+        result = compute_diff(base, curr)
+        changed = result.events_by_category(ChangeCategory.DEFAULT_VALUE_CHANGED)
+        assert len(changed) == 1
+
+    def test_constraint_pk_changed(self) -> None:
+        base = _snap(
+            "v1",
+            [_res("t", [FieldDef(name="id", field_type="integer", constraints=FieldConstraint(primary_key=True))])],
+        )
+        curr = _snap(
+            "v2",
+            [_res("t", [FieldDef(name="id", field_type="integer", constraints=FieldConstraint(primary_key=False))])],
+        )
+        result = compute_diff(base, curr)
+        changed = result.events_by_category(ChangeCategory.CONSTRAINT_CHANGED)
+        assert len(changed) == 1
+
+    def test_constraint_fk_changed(self) -> None:
+        base = _snap(
+            "v1",
+            [
+                _res(
+                    "orders",
+                    [FieldDef(name="user_id", field_type="integer", constraints=FieldConstraint(foreign_key="users.id"))],
+                )
+            ],
+        )
+        curr = _snap(
+            "v2",
+            [_res("orders", [FieldDef(name="user_id", field_type="integer")])],
+        )
+        result = compute_diff(base, curr)
+        changed = result.events_by_category(ChangeCategory.FOREIGN_KEY_CHANGED)
+        assert len(changed) == 1
+
+    def test_constraint_max_length_changed(self) -> None:
+        base = _snap(
+            "v1",
+            [_res("t", [FieldDef(name="name", field_type="string", constraints=FieldConstraint(max_length=50))])],
+        )
+        curr = _snap(
+            "v2",
+            [_res("t", [FieldDef(name="name", field_type="string", constraints=FieldConstraint(max_length=100))])],
+        )
+        result = compute_diff(base, curr)
+        changed = result.events_by_category(ChangeCategory.CONSTRAINT_CHANGED)
+        assert len(changed) == 1
+
+    def test_no_constraint_change(self) -> None:
+        f = FieldDef(name="id", field_type="integer", constraints=FieldConstraint(primary_key=True))
+        base = _snap("v1", [_res("t", [f])])
+        curr = _snap("v2", [_res("t", [f])])
+        result = compute_diff(base, curr)
+        assert result.has_changes is False
 
 
 class TestDiffEngineEdgeCases:

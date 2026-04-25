@@ -9,13 +9,17 @@ from __future__ import annotations
 from difflib import SequenceMatcher
 
 from driftguard.diff.events import (
+    ConstraintChanged,
+    DefaultValueChanged,
     DiffEvent,
     DiffResult,
     EnumValuesChanged,
     FieldAdded,
     FieldRemoved,
     FieldRenamed,
+    ForeignKeyChanged,
     NullableChanged,
+    PrimaryKeyChanged,
     RequiredChanged,
     ResourceAdded,
     ResourceRemoved,
@@ -212,5 +216,106 @@ def _diff_field(resource_name: str, baseline: FieldDef, current: FieldDef) -> li
                     removed_values=removed,
                 )
             )
+
+    # Default value changed
+    if baseline.default != current.default:
+        events.append(
+            DefaultValueChanged(
+                resource_name=resource_name,
+                description=f"Default changed: {resource_name}.{fname} ({baseline.default} -> {current.default})",
+                field_name=fname,
+                old_default=str(baseline.default) if baseline.default is not None else None,
+                new_default=str(current.default) if current.default is not None else None,
+            )
+        )
+
+    # Constraint changes
+    events.extend(_diff_constraints(resource_name, fname, baseline, current))
+
+    return events
+
+
+def _diff_constraints(resource_name: str, fname: str, baseline: FieldDef, current: FieldDef) -> list[DiffEvent]:
+    """Compare constraint metadata between two field versions."""
+    events: list[DiffEvent] = []
+    bc = baseline.constraints
+    cc = current.constraints
+
+    if bc is None and cc is None:
+        return events
+
+    # PK changed
+    b_pk = bc.primary_key if bc else False
+    c_pk = cc.primary_key if cc else False
+    if b_pk != c_pk:
+        events.append(
+            ConstraintChanged(
+                resource_name=resource_name,
+                description=f"Primary key changed: {resource_name}.{fname} ({b_pk} -> {c_pk})",
+                field_name=fname,
+                constraint_type="primary_key",
+                old_value=str(b_pk),
+                new_value=str(c_pk),
+            )
+        )
+
+    # Unique changed
+    b_unique = bc.unique if bc else False
+    c_unique = cc.unique if cc else False
+    if b_unique != c_unique:
+        events.append(
+            ConstraintChanged(
+                resource_name=resource_name,
+                description=f"Unique constraint changed: {resource_name}.{fname} ({b_unique} -> {c_unique})",
+                field_name=fname,
+                constraint_type="unique",
+                old_value=str(b_unique),
+                new_value=str(c_unique),
+            )
+        )
+
+    # FK changed
+    b_fk = bc.foreign_key if bc else None
+    c_fk = cc.foreign_key if cc else None
+    if b_fk != c_fk:
+        events.append(
+            ForeignKeyChanged(
+                resource_name=resource_name,
+                description=f"Foreign key changed: {resource_name}.{fname} ({b_fk} -> {c_fk})",
+                field_name=fname,
+                old_reference=b_fk,
+                new_reference=c_fk,
+            )
+        )
+
+    # Max length changed
+    b_maxlen = bc.max_length if bc else None
+    c_maxlen = cc.max_length if cc else None
+    if b_maxlen != c_maxlen:
+        events.append(
+            ConstraintChanged(
+                resource_name=resource_name,
+                description=f"Max length changed: {resource_name}.{fname} ({b_maxlen} -> {c_maxlen})",
+                field_name=fname,
+                constraint_type="max_length",
+                old_value=str(b_maxlen) if b_maxlen is not None else None,
+                new_value=str(c_maxlen) if c_maxlen is not None else None,
+            )
+        )
+
+    # Pattern changed
+    b_pat = bc.pattern if bc else None
+    c_pat = cc.pattern if cc else None
+    if b_pat != c_pat:
+        events.append(
+            ConstraintChanged(
+                resource_name=resource_name,
+                description=f"Pattern changed: {resource_name}.{fname}",
+                field_name=fname,
+                constraint_type="pattern",
+                old_value=b_pat,
+                new_value=c_pat,
+            )
+        )
 
     return events
