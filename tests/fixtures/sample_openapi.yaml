@@ -1,0 +1,36 @@
+openapi: "3.0.3"
+info:
+  title: Sample API
+  version: "1.0.0"
+paths: {}
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - admin
+            - user
+            - guest
+    Order:
+      type: object
+      required:
+        - id
+        - total
+      properties:
+        id:
+          type: integer
+        total:
+          type: number
+        currency:
+          type: string
+          default: USD

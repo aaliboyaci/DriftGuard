@@ -31,6 +31,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `DriftGuardConfig`: YAML-based config with source definitions and policy overrides
 - `load_config` / `save_config` / `default_config` utilities
 - 116 total tests passing
+- `BaseCollector` abstract interface for all source adapters
+- `JsonSchemaCollector`: extracts fields from JSON Schema files (type, nullable, enum, default)
+- `OpenApiCollector`: extracts component schemas from OpenAPI 3.x / Swagger 2.x specs
+- `CsvCollector`: infers field types from CSV headers and sample data
+- `PostgresCollector`: SQLAlchemy-based introspection with PK, FK, unique constraint detection
+- Test fixtures: sample JSON Schema, OpenAPI YAML, CSV files
+- 134 total tests passing
 
 ### Fixed
 - pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`
