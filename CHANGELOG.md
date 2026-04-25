@@ -8,12 +8,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
-- "Why DriftGuard?" and "Not a linter" sections in README
+- "Why DriftGuard?" and "Not a linter, not a migration tool" sections in README
 - Real CLI output from OpenAPI demo in README
 - v0.1.0 scope completed milestone in roadmap
+- CONTRIBUTING.md with development setup, code style, and PR guidelines
+- CODE_OF_CONDUCT.md (Contributor Covenant v2.1)
+- SECURITY.md with vulnerability reporting process
+- ROADMAP.md with versioned milestone plan through v1.0.0
+- GitHub issue templates: bug report (YAML form) and feature request
+- GitHub release notes template
+- Semantic versioning section in README
+- Separate installation section (pip, uv, poetry) in README
+- GitHub release notes for v0.1.0
+- v0.1.1 milestone on GitHub
+- Expanded PyPI keywords and classifiers for discoverability
 
 ### Changed
 - CHANGELOG format tightened to release-based structure
+- Package description improved for PyPI
 
 ## [0.1.0] - 2025-04-25
 
