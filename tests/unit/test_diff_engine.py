@@ -215,7 +215,11 @@ class TestDiffEngineNewEvents:
             [
                 _res(
                     "orders",
-                    [FieldDef(name="user_id", field_type="integer", constraints=FieldConstraint(foreign_key="users.id"))],
+                    [
+                        FieldDef(
+                            name="user_id", field_type="integer", constraints=FieldConstraint(foreign_key="users.id")
+                        )
+                    ],
                 )
             ],
         )

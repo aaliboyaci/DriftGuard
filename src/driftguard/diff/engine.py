@@ -19,7 +19,6 @@ from driftguard.diff.events import (
     FieldRenamed,
     ForeignKeyChanged,
     NullableChanged,
-    PrimaryKeyChanged,
     RequiredChanged,
     ResourceAdded,
     ResourceRemoved,

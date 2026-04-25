@@ -144,21 +144,22 @@ def _apply_strict(decision: PolicyDecision) -> PolicyDecision:
 
 def _apply_lenient(decision: PolicyDecision) -> PolicyDecision:
     """Lenient mode: demote breaking to warning (except resource removal)."""
-    if decision.severity == Severity.BREAKING:
-        if decision.event.category != ChangeCategory.RESOURCE_REMOVED:
-            return PolicyDecision(
-                event=decision.event,
-                severity=Severity.WARNING,
-                reason=f"[lenient] {decision.reason}",
-            )
+    if decision.severity == Severity.BREAKING and decision.event.category != ChangeCategory.RESOURCE_REMOVED:
+        return PolicyDecision(
+            event=decision.event,
+            severity=Severity.WARNING,
+            reason=f"[lenient] {decision.reason}",
+        )
     return decision
 
 
 def _apply_backward_compatible(decision: PolicyDecision) -> PolicyDecision:
     """Backward-compatible mode: only additions are safe, everything else is strict."""
-    if decision.event.category in (ChangeCategory.RESOURCE_ADDED, ChangeCategory.FIELD_ADDED):
-        if decision.severity == Severity.INFO:
-            return decision
+    if (
+        decision.event.category in (ChangeCategory.RESOURCE_ADDED, ChangeCategory.FIELD_ADDED)
+        and decision.severity == Severity.INFO
+    ):
+        return decision
     if decision.severity == Severity.WARNING:
         return PolicyDecision(
             event=decision.event,
