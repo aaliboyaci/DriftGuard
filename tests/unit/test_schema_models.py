@@ -143,6 +143,49 @@ class TestContractSnapshot:
         s = ContractSnapshot(name="test")
         assert s.created_at.tzinfo == UTC
 
+    def test_snapshot_v2_metadata(self) -> None:
+        s = ContractSnapshot(
+            name="v2-test",
+            created_by="ci-bot",
+            git_commit_sha="abc123def",
+            branch_name="main",
+            source_hash="sha256:deadbeef",
+            collector_version="0.1.0",
+            environment="production",
+            tags=["nightly", "full-scan"],
+            description="Nightly full schema scan",
+        )
+        assert s.schema_version == 1
+        assert s.created_by == "ci-bot"
+        assert s.git_commit_sha == "abc123def"
+        assert s.branch_name == "main"
+        assert s.source_hash == "sha256:deadbeef"
+        assert s.collector_version == "0.1.0"
+        assert s.environment == "production"
+        assert s.tags == ["nightly", "full-scan"]
+        assert s.description == "Nightly full schema scan"
+
+    def test_snapshot_v2_defaults(self) -> None:
+        s = ContractSnapshot(name="minimal")
+        assert s.schema_version == 1
+        assert s.created_by is None
+        assert s.git_commit_sha is None
+        assert s.tags == []
+        assert s.description is None
+
+    def test_snapshot_backward_compat(self) -> None:
+        """Old snapshots without v2 fields should still deserialize."""
+        old_data = {
+            "name": "old-snapshot",
+            "resources": [],
+            "metadata": {"version": "0.1.0"},
+        }
+        s = ContractSnapshot.model_validate(old_data)
+        assert s.name == "old-snapshot"
+        assert s.schema_version == 1
+        assert s.created_by is None
+        assert s.tags == []
+
     def test_json_roundtrip(self) -> None:
         s = ContractSnapshot(
             name="full",

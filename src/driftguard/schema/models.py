@@ -91,6 +91,15 @@ class ContractSnapshot(BaseModel):
 
     name: str = Field(description="Snapshot identifier, e.g. 'baseline', 'v1.2.0', '2025-04-25'")
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    schema_version: int = Field(default=1, description="Snapshot schema version for backward compat")
+    created_by: str | None = Field(default=None, description="User or system that created this snapshot")
+    git_commit_sha: str | None = Field(default=None, description="Git commit SHA at snapshot time")
+    branch_name: str | None = Field(default=None, description="Git branch name at snapshot time")
+    source_hash: str | None = Field(default=None, description="Hash of source data for change detection")
+    collector_version: str | None = Field(default=None, description="Version of collector used")
+    environment: str | None = Field(default=None, description="Environment: dev, staging, production")
+    tags: list[str] = Field(default_factory=list, description="Free-form tags for filtering/grouping")
+    description: str | None = Field(default=None, description="Human-readable description of this snapshot")
     resources: list[ResourceSchema] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
