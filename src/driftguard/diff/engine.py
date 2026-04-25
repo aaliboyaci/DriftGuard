@@ -6,19 +6,24 @@ describing every meaningful schema change between them.
 
 from __future__ import annotations
 
+from difflib import SequenceMatcher
+
 from driftguard.diff.events import (
     DiffEvent,
     DiffResult,
     EnumValuesChanged,
     FieldAdded,
     FieldRemoved,
+    FieldRenamed,
     NullableChanged,
     RequiredChanged,
     ResourceAdded,
     ResourceRemoved,
     TypeChanged,
 )
-from driftguard.schema.models import ContractSnapshot, ResourceSchema
+from driftguard.schema.models import ContractSnapshot, FieldDef, ResourceSchema
+
+RENAME_SIMILARITY_THRESHOLD = 0.5
 
 
 def compute_diff(baseline: ContractSnapshot, current: ContractSnapshot) -> DiffResult:
@@ -51,6 +56,36 @@ def compute_diff(baseline: ContractSnapshot, current: ContractSnapshot) -> DiffR
     )
 
 
+def _detect_renames(
+    removed: dict[str, FieldDef], added: dict[str, FieldDef], resource_name: str
+) -> list[tuple[str, str, FieldDef]]:
+    """Detect probable renames among removed/added fields using fuzzy name matching.
+
+    Returns list of (old_name, new_name, new_field) tuples for matches.
+    Only matches fields with the same type and similarity above threshold.
+    """
+    renames: list[tuple[str, str, FieldDef]] = []
+    matched_added: set[str] = set()
+
+    for old_name, old_field in removed.items():
+        best_score = 0.0
+        best_match: str | None = None
+        for new_name, new_field in added.items():
+            if new_name in matched_added:
+                continue
+            if old_field.field_type != new_field.field_type:
+                continue
+            score = SequenceMatcher(None, old_name, new_name).ratio()
+            if score > best_score and score >= RENAME_SIMILARITY_THRESHOLD:
+                best_score = score
+                best_match = new_name
+        if best_match is not None:
+            renames.append((old_name, best_match, added[best_match]))
+            matched_added.add(best_match)
+
+    return renames
+
+
 def _diff_resource(baseline: ResourceSchema, current: ResourceSchema) -> list[DiffEvent]:
     """Compare two versions of the same resource and return field-level events."""
     events: list[DiffEvent] = []
@@ -62,8 +97,29 @@ def _diff_resource(baseline: ResourceSchema, current: ResourceSchema) -> list[Di
     b_names = set(b_fields.keys())
     c_names = set(c_fields.keys())
 
-    # Removed fields
+    removed_fields = {n: b_fields[n] for n in sorted(b_names - c_names)}
+    added_fields = {n: c_fields[n] for n in sorted(c_names - b_names)}
+
+    # Detect renames from removed+added pairs
+    renames = _detect_renames(removed_fields, added_fields, resource_name)
+    renamed_old = {old for old, _, _ in renames}
+    renamed_new = {new for _, new, _ in renames}
+
+    for old_name, new_name, new_field in renames:
+        events.append(
+            FieldRenamed(
+                resource_name=resource_name,
+                description=f"Field renamed: {resource_name}.{old_name} -> {new_name}",
+                old_name=old_name,
+                new_name=new_name,
+                field_type=new_field.field_type,
+            )
+        )
+
+    # Removed fields (excluding renames)
     for fname in sorted(b_names - c_names):
+        if fname in renamed_old:
+            continue
         bf = b_fields[fname]
         events.append(
             FieldRemoved(
@@ -74,8 +130,10 @@ def _diff_resource(baseline: ResourceSchema, current: ResourceSchema) -> list[Di
             )
         )
 
-    # Added fields
+    # Added fields (excluding renames)
     for fname in sorted(c_names - b_names):
+        if fname in renamed_new:
+            continue
         cf = c_fields[fname]
         events.append(
             FieldAdded(
@@ -97,13 +155,8 @@ def _diff_resource(baseline: ResourceSchema, current: ResourceSchema) -> list[Di
     return events
 
 
-def _diff_field(resource_name: str, baseline: FieldDef, current: FieldDef) -> list[DiffEvent]:  # type: ignore[name-defined]  # noqa: F821
+def _diff_field(resource_name: str, baseline: FieldDef, current: FieldDef) -> list[DiffEvent]:
     """Compare two versions of the same field and return change events."""
-    from driftguard.schema.models import FieldDef as _FieldDef
-
-    assert isinstance(baseline, _FieldDef)
-    assert isinstance(current, _FieldDef)
-
     events: list[DiffEvent] = []
     fname = baseline.name
 

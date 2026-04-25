@@ -142,6 +142,37 @@ class TestDiffEngineFields:
         assert result.event_count == 4
 
 
+class TestDiffEngineRename:
+    def test_fuzzy_rename_detected(self) -> None:
+        """email -> email_address with same type should be detected as rename."""
+        base = _snap("v1", [_res("users", [_field("email", "string")])])
+        curr = _snap("v2", [_res("users", [_field("email_address", "string")])])
+        result = compute_diff(base, curr)
+        renames = result.events_by_category(ChangeCategory.FIELD_RENAMED)
+        assert len(renames) == 1
+        assert renames[0].old_name == "email"
+        assert renames[0].new_name == "email_address"
+        # Should NOT also show up as remove + add
+        assert len(result.events_by_category(ChangeCategory.FIELD_REMOVED)) == 0
+        assert len(result.events_by_category(ChangeCategory.FIELD_ADDED)) == 0
+
+    def test_no_rename_different_types(self) -> None:
+        """Fields with different types should not be matched as rename."""
+        base = _snap("v1", [_res("t", [_field("amount", "integer")])])
+        curr = _snap("v2", [_res("t", [_field("amount_total", "string")])])
+        result = compute_diff(base, curr)
+        renames = result.events_by_category(ChangeCategory.FIELD_RENAMED)
+        assert len(renames) == 0
+
+    def test_no_rename_low_similarity(self) -> None:
+        """Fields with completely different names should not be matched."""
+        base = _snap("v1", [_res("t", [_field("foo", "string")])])
+        curr = _snap("v2", [_res("t", [_field("xyz", "string")])])
+        result = compute_diff(base, curr)
+        renames = result.events_by_category(ChangeCategory.FIELD_RENAMED)
+        assert len(renames) == 0
+
+
 class TestDiffEngineEdgeCases:
     def test_empty_snapshots(self) -> None:
         base = _snap("v1", [])
