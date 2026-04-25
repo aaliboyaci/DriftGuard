@@ -22,6 +22,18 @@ In large systems, data structures don't live in one place. The same domain data 
 
 The worst part: these changes don't fail at deploy time. Errors surface hours later in data jobs, partner integrations, or reporting layers.
 
+## Why DriftGuard?
+
+Most schema tools focus on **one layer**: a database migration linter checks SQL, an API linter checks OpenAPI specs. But real drift happens **across layers** — a Postgres column rename breaks a downstream CSV export, an API field removal crashes a partner's mobile app.
+
+DriftGuard doesn't lint individual schemas. It **takes snapshots** of your contracts at different points in time and **compares them semantically**. It understands that renaming a field is a breaking change, that widening `integer` to `number` is a warning, and that adding an optional field is safe. It works across Postgres, OpenAPI, JSON Schema, and CSV — giving you one unified view of contract drift.
+
+**Use DriftGuard when:**
+- Multiple teams consume the same data sources and nobody owns the contract
+- Schema changes deploy without review and break downstream at 2 AM
+- You need a CI gate that blocks breaking changes before they merge
+- You want to track how your data contracts evolve over time
+
 ## Features
 
 - **Semantic diff** - Not just text diff: detects field removed, type narrowed, nullable changed, enum expanded
