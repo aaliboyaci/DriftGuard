@@ -50,12 +50,22 @@ It is a **contract drift detector**: snapshot, compare, classify, gate.
 - **Multiple report formats** - Terminal (Rich), JSON, Markdown, HTML
 - **Versioned snapshots** - Baseline and current snapshots stored and compared
 
+## Installation
+
+```bash
+# pip
+pip install driftguard
+
+# uv
+uv pip install driftguard
+
+# poetry
+poetry add driftguard
+```
+
 ## Quick Start
 
 ```bash
-# Install
-pip install driftguard
-
 # Initialize config in your project
 driftguard init
 
