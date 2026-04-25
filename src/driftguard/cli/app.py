@@ -29,7 +29,9 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 config_app = typer.Typer(name="config", help="Configuration management commands", no_args_is_help=True)
+snapshots_app = typer.Typer(name="snapshots", help="Snapshot management commands", no_args_is_help=True)
 app.add_typer(config_app)
+app.add_typer(snapshots_app)
 console = Console()
 
 
@@ -229,6 +231,57 @@ def config_print(
     data = cfg.model_dump(mode="json", exclude_none=True)
     output = _yaml.dump(data, default_flow_style=False, sort_keys=False, allow_unicode=True)
     console.print(output)
+
+
+@snapshots_app.command("list")
+def snapshots_list(
+    config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """List all stored snapshots."""
+    cfg = _load_config(config)
+    store = LocalStore(cfg.snapshot_dir)
+    names = store.list_snapshots()
+    if not names:
+        console.print("[yellow]No snapshots found.[/yellow]")
+        return
+    console.print(f"[bold]Snapshots ({len(names)}):[/bold]")
+    for name in names:
+        info = store.snapshot_info(name)
+        console.print(f"  {name} — {info['resource_count']} resources, {info['size_bytes']} bytes")
+
+
+@snapshots_app.command("show")
+def snapshots_show(
+    name: str = typer.Option(..., "--name", "-n", help="Snapshot name"),
+    config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Show details of a stored snapshot."""
+    cfg = _load_config(config)
+    store = LocalStore(cfg.snapshot_dir)
+    info = store.snapshot_info(name)
+    snap = store.load(name)
+    console.print(f"[bold]Snapshot: {name}[/bold]")
+    console.print(f"  Created: {info['created_at']}")
+    console.print(f"  Resources: {info['resource_count']}")
+    console.print(f"  Size: {info['size_bytes']} bytes")
+    console.print(f"  Checksum: {info['checksum']}")
+    for res in snap.resources:
+        console.print(f"  - {res.name} ({len(res.fields)} fields)")
+
+
+@snapshots_app.command("delete")
+def snapshots_delete(
+    name: str = typer.Option(..., "--name", "-n", help="Snapshot name"),
+    config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Delete a stored snapshot."""
+    cfg = _load_config(config)
+    store = LocalStore(cfg.snapshot_dir)
+    if store.delete(name):
+        console.print(f"[green]Deleted snapshot: {name}[/green]")
+    else:
+        console.print(f"[red]Snapshot not found: {name}[/red]")
+        raise typer.Exit(1)
 
 
 def _load_config(path: str) -> DriftGuardConfig:
