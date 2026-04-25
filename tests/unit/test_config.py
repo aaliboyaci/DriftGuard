@@ -115,6 +115,22 @@ class TestLoadConfig:
             load_config(path)
 
 
+class TestConfigMigration:
+    def test_v0_config_migrates_to_v1(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
+        """A config without schema_version (v0) should migrate cleanly."""
+        old_config = {
+            "version": "1",
+            "sources": [{"name": "api", "type": "openapi", "path": "spec.yaml"}],
+        }
+        path = tmp_path / "driftguard.yaml"
+        path.write_text(yaml.dump(old_config), encoding="utf-8")
+        config = load_config(path)
+        assert config.schema_version == 1
+        assert config.project_name is None
+        assert config.environment is None
+        assert config.notification.enabled is False
+
+
 class TestSaveConfig:
     def test_save_and_reload(self, tmp_path: "pytest.TempPathFactory") -> None:  # type: ignore[type-arg]
         config = DriftGuardConfig(

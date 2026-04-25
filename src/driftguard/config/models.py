@@ -59,6 +59,29 @@ class DriftGuardConfig(BaseModel):
     notification: NotificationConfig = Field(default_factory=NotificationConfig)
 
 
+CURRENT_SCHEMA_VERSION = 1
+
+
+def _migrate_config(data: dict[str, Any]) -> dict[str, Any]:
+    """Migrate config data from older schema versions to current.
+
+    Each migration step transforms the data dict in-place and bumps
+    the schema_version. Add new migrations as elif branches.
+    """
+    schema_ver = data.get("schema_version", 0)
+
+    if schema_ver < 1:
+        # v0 -> v1: ensure new fields have defaults
+        data.setdefault("schema_version", 1)
+        data.setdefault("project_name", None)
+        data.setdefault("environment", None)
+        data.setdefault("owner_team", None)
+        data.setdefault("notification", {})
+
+    data["schema_version"] = CURRENT_SCHEMA_VERSION
+    return data
+
+
 def load_config(path: str | Path = "driftguard.yaml") -> DriftGuardConfig:
     """Load configuration from a YAML file."""
     config_path = Path(path)
@@ -68,6 +91,7 @@ def load_config(path: str | Path = "driftguard.yaml") -> DriftGuardConfig:
     data = yaml.safe_load(text)
     if data is None:
         return DriftGuardConfig()
+    data = _migrate_config(data)
     return DriftGuardConfig.model_validate(data)
 
 
