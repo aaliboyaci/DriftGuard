@@ -17,6 +17,8 @@ class SourceType(str, Enum):
     """Type of data source a schema was collected from."""
 
     POSTGRES = "postgres"
+    MYSQL = "mysql"
+    SQLITE = "sqlite"
     OPENAPI = "openapi"
     JSON_SCHEMA = "json_schema"
     JSON_PAYLOAD = "json_payload"

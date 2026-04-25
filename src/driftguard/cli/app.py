@@ -252,8 +252,10 @@ def _create_collector(source: SourceConfig) -> BaseCollector | None:  # type: ig
     from driftguard.collectors import (
         CsvCollector,
         JsonSchemaCollector,
+        MysqlCollector,
         OpenApiCollector,
         PostgresCollector,
+        SqliteCollector,
     )
     from driftguard.config.models import SourceConfig
 
@@ -263,6 +265,14 @@ def _create_collector(source: SourceConfig) -> BaseCollector | None:  # type: ig
             if source.connection is None:
                 return None
             return PostgresCollector(source.connection, source.options.get("schema", "public"))
+        case SourceType.MYSQL:
+            if source.connection is None:
+                return None
+            return MysqlCollector(source.connection, source.options.get("schema", ""))
+        case SourceType.SQLITE:
+            if source.path is None:
+                return None
+            return SqliteCollector(source.path)
         case SourceType.OPENAPI:
             if source.path is None:
                 return None
