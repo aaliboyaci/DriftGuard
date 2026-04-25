@@ -17,3 +17,4 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Test directories: tests/unit, tests/integration, tests/golden
 - Example directories: postgres-demo, openapi-demo, file-schema-demo
 - py.typed marker for PEP 561 type stub support
+- README.md with problem statement, features, quick start, architecture, risk classification table
