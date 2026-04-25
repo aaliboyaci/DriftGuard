@@ -1,0 +1,60 @@
+# DriftGuard Enterprise Configuration Example
+# Copy this file as driftguard.yaml and customize for your project.
+
+version: "1"
+schema_version: 1
+
+# Project metadata
+project_name: "my-platform-service"
+environment: "production"
+owner_team: "platform-engineering"
+
+# Snapshot storage
+snapshot_dir: ".driftguard/snapshots"
+
+# Data sources to monitor
+sources:
+  - name: "main-database"
+    type: postgres
+    connection: "${DATABASE_URL}"  # Use env vars for credentials
+    options:
+      schema: "public"
+
+  - name: "public-api"
+    type: openapi
+    path: "docs/openapi.yaml"
+
+  - name: "event-schema"
+    type: json_schema
+    path: "schemas/events/order-placed.json"
+
+  - name: "export-format"
+    type: csv
+    path: "data/exports/daily-report.csv"
+
+# Policy overrides - customize risk levels per resource/field
+policy_overrides:
+  # Downgrade legacy table removals to warning (planned deprecation)
+  - resource: "legacy_*"
+    category: "field_removed"
+    severity: "warning"
+
+  # Treat all changes in staging-only tables as info
+  - resource: "staging_*"
+    category: "*"
+    severity: "info"
+
+# Report formats to generate
+report_formats:
+  - terminal
+  - markdown
+  - json
+
+# Notification settings (future feature)
+notification:
+  enabled: false
+  channels:
+    - slack
+  webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+  on_breaking: true
+  on_warning: false
