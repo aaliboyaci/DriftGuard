@@ -197,6 +197,16 @@ mypy src/
 - **ruff** + **mypy** for code quality
 - **GitHub Actions** for CI
 
+## Versioning
+
+DriftGuard follows [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** (1.0.0) — incompatible API or config changes
+- **MINOR** (0.2.0) — new features, collectors, or reporters (backward compatible)
+- **PATCH** (0.1.1) — bug fixes, docs, and polish (no behavior change)
+
+See [CHANGELOG.md](CHANGELOG.md) for release history and [ROADMAP.md](ROADMAP.md) for the full plan.
+
 ## Roadmap
 
 ### v0.1.0 — Scope Completed
