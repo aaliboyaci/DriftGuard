@@ -92,7 +92,10 @@ def load_config(path: str | Path = "driftguard.yaml") -> DriftGuardConfig:
     if data is None:
         return DriftGuardConfig()
     data = _migrate_config(data)
-    return DriftGuardConfig.model_validate(data)
+    try:
+        return DriftGuardConfig.model_validate(data)
+    except Exception as exc:
+        raise ValueError(f"Invalid config in {config_path}: {exc}") from exc
 
 
 def default_config() -> DriftGuardConfig:
