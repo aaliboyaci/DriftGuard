@@ -32,8 +32,12 @@ class TerminalReporter:
             self.console.print("[green]No schema changes detected.[/green]")
             return
 
-        self.console.print(f"\n[bold]Schema Drift Report[/bold]: {diff_result.baseline_name} -> {diff_result.current_name}")
-        self.console.print(f"Changes: {diff_result.event_count} | Breaking: {policy_result.breaking_count} | Warnings: {policy_result.warning_count} | Info: {policy_result.info_count}\n")
+        self.console.print(
+            f"\n[bold]Schema Drift Report[/bold]: {diff_result.baseline_name} -> {diff_result.current_name}"
+        )
+        self.console.print(
+            f"Changes: {diff_result.event_count} | Breaking: {policy_result.breaking_count} | Warnings: {policy_result.warning_count} | Info: {policy_result.info_count}\n"
+        )
 
         table = Table(show_header=True, header_style="bold")
         table.add_column("Severity", width=10)

@@ -155,7 +155,9 @@ def check(
     reporter.report(diff_result, policy_result)
 
     if policy_result.has_breaking:
-        console.print(f"\n[red bold]BREAKING CHANGES DETECTED: {policy_result.breaking_count} breaking change(s)[/red bold]")
+        console.print(
+            f"\n[red bold]BREAKING CHANGES DETECTED: {policy_result.breaking_count} breaking change(s)[/red bold]"
+        )
         raise typer.Exit(1)
 
     console.print("\n[green]No breaking changes. CI check passed.[/green]")

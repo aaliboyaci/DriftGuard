@@ -6,9 +6,7 @@ from driftguard.policy import PolicyDecision, PolicyResult, Severity
 
 def _breaking_decision() -> PolicyDecision:
     return PolicyDecision(
-        event=FieldRemoved(
-            resource_name="users", description="Removed email", field_name="email", field_type="string"
-        ),
+        event=FieldRemoved(resource_name="users", description="Removed email", field_name="email", field_type="string"),
         severity=Severity.BREAKING,
         reason="Consumer expects this field",
     )
@@ -88,9 +86,7 @@ class TestPolicyResult:
         assert len(r.by_severity(Severity.INFO)) == 1
 
     def test_counts(self) -> None:
-        r = PolicyResult(
-            decisions=[_breaking_decision(), _breaking_decision(), _warning_decision(), _info_decision()]
-        )
+        r = PolicyResult(decisions=[_breaking_decision(), _breaking_decision(), _warning_decision(), _info_decision()])
         assert r.breaking_count == 2
         assert r.warning_count == 1
         assert r.info_count == 1

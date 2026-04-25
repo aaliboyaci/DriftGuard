@@ -87,7 +87,11 @@ class TestMarkdownReporter:
     def test_empty_diff(self) -> None:
         snap = ContractSnapshot(
             name="same",
-            resources=[ResourceSchema(name="t", source_type=SourceType.POSTGRES, fields=[FieldDef(name="id", field_type="integer")])],
+            resources=[
+                ResourceSchema(
+                    name="t", source_type=SourceType.POSTGRES, fields=[FieldDef(name="id", field_type="integer")]
+                )
+            ],
         )
         diff_result = compute_diff(snap, snap)
         policy_result = evaluate(diff_result)

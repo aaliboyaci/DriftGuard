@@ -63,7 +63,9 @@ def current_snapshot_breaking() -> ContractSnapshot:
                     FieldDef(name="id", field_type="integer", constraints=FieldConstraint(primary_key=True)),
                     FieldDef(name="name", field_type="string"),
                     # email removed -> breaking
-                    FieldDef(name="age", field_type="string", nullable=True, required=False),  # integer->string: breaking
+                    FieldDef(
+                        name="age", field_type="string", nullable=True, required=False
+                    ),  # integer->string: breaking
                     FieldDef(
                         name="status",
                         field_type="string",

@@ -30,15 +30,11 @@ def compute_diff(baseline: ContractSnapshot, current: ContractSnapshot) -> DiffR
 
     # Removed resources
     for name in sorted(baseline_names - current_names):
-        events.append(
-            ResourceRemoved(resource_name=name, description=f"Resource removed: {name}")
-        )
+        events.append(ResourceRemoved(resource_name=name, description=f"Resource removed: {name}"))
 
     # Added resources
     for name in sorted(current_names - baseline_names):
-        events.append(
-            ResourceAdded(resource_name=name, description=f"Resource added: {name}")
-        )
+        events.append(ResourceAdded(resource_name=name, description=f"Resource added: {name}"))
 
     # Changed resources
     for name in sorted(baseline_names & current_names):

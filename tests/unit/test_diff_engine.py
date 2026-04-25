@@ -111,17 +111,33 @@ class TestDiffEngineFields:
         assert result.has_changes is False
 
     def test_multiple_field_changes(self) -> None:
-        base = _snap("v1", [_res("t", [
-            _field("a", "integer"),
-            _field("b", "string", nullable=False),
-            _field("c", "string"),
-        ])])
-        curr = _snap("v2", [_res("t", [
-            _field("a", "string"),  # type changed
-            _field("b", "string", nullable=True),  # nullable changed
-            # c removed
-            _field("d", "boolean"),  # d added
-        ])])
+        base = _snap(
+            "v1",
+            [
+                _res(
+                    "t",
+                    [
+                        _field("a", "integer"),
+                        _field("b", "string", nullable=False),
+                        _field("c", "string"),
+                    ],
+                )
+            ],
+        )
+        curr = _snap(
+            "v2",
+            [
+                _res(
+                    "t",
+                    [
+                        _field("a", "string"),  # type changed
+                        _field("b", "string", nullable=True),  # nullable changed
+                        # c removed
+                        _field("d", "boolean"),  # d added
+                    ],
+                )
+            ],
+        )
         result = compute_diff(base, curr)
         assert result.event_count == 4
 

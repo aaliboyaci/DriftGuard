@@ -132,9 +132,7 @@ class TestDiffEvents:
 class TestDiffResult:
     def _make_events(self) -> list[DiffEvent]:
         return [
-            FieldRemoved(
-                resource_name="users", description="Removed email", field_name="email", field_type="string"
-            ),
+            FieldRemoved(resource_name="users", description="Removed email", field_name="email", field_type="string"),
             FieldAdded(
                 resource_name="users",
                 description="Added phone",
