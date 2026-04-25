@@ -28,6 +28,8 @@ app = typer.Typer(
     help="Enterprise Data Contract & Schema Drift Monitor",
     no_args_is_help=True,
 )
+config_app = typer.Typer(name="config", help="Configuration management commands", no_args_is_help=True)
+app.add_typer(config_app)
 console = Console()
 
 
@@ -194,6 +196,39 @@ def report(
             reporter.report(diff_result, policy_result)
         else:
             console.print(report_content)
+
+
+@config_app.command("validate")
+def config_validate(
+    path: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Validate the DriftGuard configuration file."""
+    try:
+        cfg = load_config(path)
+        console.print(f"[green]Config is valid: {path}[/green]")
+        console.print(f"  Schema version: {cfg.schema_version}")
+        console.print(f"  Sources: {len(cfg.sources)}")
+        console.print(f"  Policy overrides: {len(cfg.policy_overrides)}")
+        console.print(f"  Report formats: {', '.join(cfg.report_formats)}")
+    except FileNotFoundError:
+        console.print(f"[red]Config not found: {path}[/red]")
+        raise typer.Exit(1) from None
+    except ValueError as e:
+        console.print(f"[red]Config validation failed:[/red] {e}")
+        raise typer.Exit(1) from None
+
+
+@config_app.command("print")
+def config_print(
+    path: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Print the resolved configuration as YAML."""
+    import yaml as _yaml
+
+    cfg = _load_config(path)
+    data = cfg.model_dump(mode="json", exclude_none=True)
+    output = _yaml.dump(data, default_flow_style=False, sort_keys=False, allow_unicode=True)
+    console.print(output)
 
 
 def _load_config(path: str) -> DriftGuardConfig:
