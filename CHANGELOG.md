@@ -5,36 +5,37 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2025-04-25
+
+Config v2, Snapshot v2, new collectors, diff engine and policy engine enhancements, CLI UX improvements.
 
 ### Added
 - **Config v2:** `project_name`, `environment`, `owner_team`, `notification` settings, `schema_version` with auto-migration
 - **Config CLI:** `driftguard config validate` and `driftguard config print` subcommands
-- **Snapshot v2:** `created_by`, `git_commit_sha`, `branch_name`, `source_hash`, `collector_version`, `environment`, `tags`, `description` metadata fields with backward compatibility
-- **Snapshot store:** checksum (SHA-256), gzip export/import, retention-based cleanup, snapshot info
+- **Snapshot v2:** `created_by`, `git_commit_sha`, `branch_name`, `source_hash`, `collector_version`, `environment`, `tags`, `description` metadata — backward compatible with v1 snapshots
+- **Snapshot store:** SHA-256 checksum, gzip export/import, retention-based cleanup, snapshot info
 - **Snapshot CLI:** `driftguard snapshots list`, `snapshots show`, `snapshots delete` subcommands
-- **Diff engine:** fuzzy field rename detection (SequenceMatcher, threshold 0.5)
+- **Diff engine:** fuzzy field rename detection via SequenceMatcher (threshold 0.5)
 - **Diff events:** `DefaultValueChanged`, `ConstraintChanged`, `IndexChanged`, `ForeignKeyChanged`, `PrimaryKeyChanged`
-- **Diff engine:** constraint diffing (PK, unique, FK, max_length, min_value, max_value, pattern)
-- **Diff CLI:** `--only-breaking` and `--resource` filter flags
+- **Diff engine:** constraint diffing — PK, unique, FK, max_length, min_value, max_value, pattern
+- **Diff CLI:** `--only-breaking` and `--resource` filter flags on `driftguard diff`
 - **Policy modes:** `strict`, `lenient`, `backward_compatible`, `forward_compatible` evaluation modes
 - **Policy rules:** default value, constraint, FK, PK, index, and numeric range change classification
-- **Collectors:** MySQL (SQLAlchemy), SQLite (SQLAlchemy + tests), YAML data file inference
+- **Collectors:** MySQL (SQLAlchemy), SQLite (SQLAlchemy), YAML data file inference
 - Community files: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md
 - GitHub issue templates (bug report, feature request), release notes template
-- Enterprise config template with all available options
-- README: "Why DriftGuard?", "Not a linter", installation options, real CLI output, versioning section
-- v0.1.1 GitHub milestone, v0.1.0 GitHub release notes
+- Enterprise config template (`examples/enterprise-config.yaml`)
+- README: "Why DriftGuard?", "Not a linter", installation options (pip/uv/poetry), real CLI output, versioning section
 
 ### Changed
-- CHANGELOG format tightened to release-based structure
-- Package description, keywords, and classifiers improved for PyPI
+- CHANGELOG restructured into release-based format
+- Package description, keywords, and classifiers expanded for PyPI discoverability
 - Config validation errors now include file path context
-- Tests increased from 152 to 190
+- Tests increased from 152 to 190 (78% coverage)
 
 ## [0.1.0] - 2025-04-25
 
-First public release. Full MVP with semantic diff engine, policy engine, CLI, and multi-source collectors.
+First public release. Full MVP: semantic diff engine, policy engine, CLI, and multi-source collectors.
 
 ### Added
 - **Core:** Pydantic v2 schema models, semantic diff engine, policy engine with risk classification

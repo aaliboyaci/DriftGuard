@@ -1,6 +1,6 @@
 # DriftGuard Roadmap
 
-## v0.1.0 — MVP (Completed)
+## v0.1.0 — MVP (Released)
 
 - Semantic diff engine with field-level change detection
 - Policy engine with breaking / warning / info classification
@@ -9,75 +9,43 @@
 - Reporters: Terminal (Rich), JSON, Markdown, HTML
 - Local JSON snapshot store
 - GitHub Actions CI (Python 3.11 / 3.12 / 3.13)
-- 152 tests passing
 
-## v0.2.0 — Platform Hardening (Completed)
+## v0.2.0 — Platform Hardening (Released)
 
-- **Config v2:** `project_name`, `environment`, `owner_team`, `notification`, schema versioning with auto-migration
-- **Config CLI:** `driftguard config validate`, `driftguard config print`
-- **Snapshot v2:** `created_by`, `git_commit_sha`, `branch_name`, `source_hash`, `collector_version`, `environment`, `tags`, `description` — backward compatible
-- **Snapshot store:** SHA-256 checksum, gzip export/import, retention-based cleanup, snapshot info
-- **Snapshot CLI:** `driftguard snapshots list`, `snapshots show`, `snapshots delete`
-- **Diff engine:** fuzzy field rename detection (SequenceMatcher)
-- **Diff events:** `DefaultValueChanged`, `ConstraintChanged`, `IndexChanged`, `ForeignKeyChanged`, `PrimaryKeyChanged`
-- **Diff engine:** constraint diffing — PK, unique, FK, max_length, min_value, max_value, pattern
-- **Diff CLI:** `--only-breaking` and `--resource` filter flags
-- **Policy modes:** `strict`, `lenient`, `backward_compatible`, `forward_compatible`
-- **Collectors:** MySQL (SQLAlchemy), SQLite (SQLAlchemy), YAML data file inference
-- Community files: CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, ROADMAP
-- GitHub issue templates, release notes template, enterprise config example
-- README: "Why DriftGuard?", installation options, real CLI output, versioning section
-- PyPI metadata, keywords, and classifiers improved
-- 190 tests passing
+- Config v2: project metadata, environment, notification settings, schema migration
+- Snapshot v2: git SHA, branch, tags, description — backward compatible
+- Snapshot store: checksum, gzip export/import, cleanup, info
+- CLI: `config validate/print`, `snapshots list/show/delete`, `diff --only-breaking --resource`
+- Diff engine: fuzzy rename detection, constraint/FK/PK/default value change events
+- Policy modes: strict, lenient, backward-compatible, forward-compatible
+- Collectors: MySQL, SQLite, YAML
 
-## v0.3.0 — Event & Streaming (Planned)
+## v0.3.0 — Event & API Contracts (Next)
 
 - Avro schema collector
-- Protobuf collector
+- Protobuf schema collector
 - Kafka Schema Registry integration
 - AsyncAPI and CloudEvents support
-- Event key/value schema separation
-- Event compatibility mode
+- OpenAPI request/response body deep diff
+- Path/method/header/status code change detection
 
-## v0.4.0 — API Contract Deep Diff (Planned)
-
-- OpenAPI request/response body diff
-- Path, method, query parameter, header contract changes
-- Status code removal detection
-- Deprecated endpoint detection
-- Breaking API change report
-
-## v0.5.0 — Reporters & CI/CD (Planned)
+## v0.4.0 — Reporters & CI/CD
 
 - SARIF, JUnit XML, CSV reporters
-- GitHub PR comment reporter with inline annotations
-- GitLab CI, Bitbucket Pipelines, Azure DevOps examples
-- `driftguard approve` command for breaking change exceptions
-- GitHub Actions summary output
+- GitHub PR comment reporter
+- GitLab CI, Bitbucket Pipelines examples
+- `driftguard approve` for breaking change exceptions
 
-## v0.6.0 — Performance & Observability (Planned)
+## v0.5.0 — Performance, Security & Observability
 
-- Parallel collector execution with timeout and retry
-- Hash-based incremental diff optimization
-- Large snapshot benchmarks (10k, 100k fields)
-- Structured logging with JSON mode
-- `--verbose` and `--quiet` mode improvements
-- OpenTelemetry tracing interface
+- Parallel collector execution
+- Large snapshot benchmarks
+- Secret masking in reports
+- Structured logging, OpenTelemetry interface
 
-## v0.7.0 — Security & Compliance (Planned)
+## v1.0.0 — Enterprise Governance
 
-- Secret masking in reports and logs
-- DB connection string redaction
-- Environment variable based secret loading
-- Dependency vulnerability scanning (Bandit)
-- SBOM generation
-- Supply chain security documentation
-
-## v1.0.0 — Enterprise Governance (Planned)
-
-- Ownership metadata and team-based approval
-- Breaking change waiver mechanism with expiry
+- Team ownership and approval workflows
+- Breaking change waiver mechanism
 - Audit log and policy violation history
-- Risk trend reporting
-- Compliance mode documentation
-- Enterprise deployment guide
+- Compliance mode and enterprise deployment guide
