@@ -27,6 +27,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Policy engine: evaluates DiffEvents with risk rules (widening transitions, nullable, enum, required)
 - Golden test fixtures: baseline + breaking + clean snapshot pairs
 - 95 total tests: diff engine (18), policy engine (18), golden tests (17), model tests (42)
+- `LocalStore`: JSON-based snapshot read/write with versioning, list, delete
+- `DriftGuardConfig`: YAML-based config with source definitions and policy overrides
+- `load_config` / `save_config` / `default_config` utilities
+- 116 total tests passing
 
 ### Fixed
 - pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`
