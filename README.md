@@ -28,6 +28,13 @@ Most schema tools focus on **one layer**: a database migration linter checks SQL
 
 DriftGuard doesn't lint individual schemas. It **takes snapshots** of your contracts at different points in time and **compares them semantically**. It understands that renaming a field is a breaking change, that widening `integer` to `number` is a warning, and that adding an optional field is safe. It works across Postgres, OpenAPI, JSON Schema, and CSV — giving you one unified view of contract drift.
 
+**DriftGuard is not:**
+- A **linter** — it doesn't check style or best practices on a single schema
+- A **migration tool** — it doesn't generate ALTER TABLE or manage state
+- A **runtime monitor** — it runs at build time, in CI, or on demand
+
+It is a **contract drift detector**: snapshot, compare, classify, gate.
+
 **Use DriftGuard when:**
 - Multiple teams consume the same data sources and nobody owns the contract
 - Schema changes deploy without review and break downstream at 2 AM
