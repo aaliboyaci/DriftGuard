@@ -169,12 +169,14 @@ mypy src/
 
 ## Roadmap
 
-### v0.1.0 (Current)
+### v0.1.0 — Scope Completed
 - Core diff engine with semantic change detection
-- Policy engine with risk classification
+- Policy engine with risk classification (breaking / warning / info)
 - CLI with init, snapshot, diff, check, report commands
 - Collectors: PostgreSQL, OpenAPI, JSON Schema, CSV
 - Reporters: Terminal, JSON, Markdown, HTML
+- 152 tests passing across Python 3.11 / 3.12 / 3.13
+- GitHub Actions CI with lint, type-check, and test matrix
 
 ### v0.2.0 (Planned)
 - MongoDB schema inference adapter

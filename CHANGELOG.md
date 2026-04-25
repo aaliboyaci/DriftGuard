@@ -4,6 +4,11 @@ All notable changes to DriftGuard will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- 200-step development roadmap (Faz 10-29) covering stabilization, config v2, snapshot v2, diff engine enhancements, policy modes, new collectors (MongoDB, MySQL, BigQuery, etc.), event/streaming support, API contract diff, file schema support, storage backends, CLI UX, reporter improvements, CI/CD integrations, PR experience, performance, security, observability, and enterprise governance
+
 ## [0.1.0] - 2025-04-25
 
 ### Added
