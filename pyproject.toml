@@ -5,14 +5,25 @@ build-backend = "hatchling.build"
 [project]
 name = "driftguard"
 version = "0.1.0"
-description = "Enterprise Data Contract & Schema Drift Monitor"
+description = "Detect schema and data contract drift across databases, APIs, and files before it breaks production"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [
     { name = "Ali Boyaci" },
 ]
-keywords = ["schema", "drift", "data-contract", "cli", "ci"]
+keywords = [
+    "schema",
+    "drift",
+    "data-contract",
+    "breaking-change",
+    "schema-validation",
+    "data-quality",
+    "ci-gate",
+    "openapi",
+    "postgres",
+    "data-engineering",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
