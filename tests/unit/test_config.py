@@ -5,6 +5,7 @@ import yaml
 
 from driftguard.config import (
     DriftGuardConfig,
+    NotificationConfig,
     PolicyOverride,
     SourceConfig,
     default_config,
@@ -26,6 +27,31 @@ class TestDriftGuardConfig:
     def test_project_name(self) -> None:
         c = DriftGuardConfig(project_name="my-service")
         assert c.project_name == "my-service"
+
+    def test_environment(self) -> None:
+        c = DriftGuardConfig(environment="production")
+        assert c.environment == "production"
+
+    def test_owner_team(self) -> None:
+        c = DriftGuardConfig(owner_team="platform-eng")
+        assert c.owner_team == "platform-eng"
+
+    def test_schema_version(self) -> None:
+        c = DriftGuardConfig()
+        assert c.schema_version == 1
+
+    def test_notification_defaults(self) -> None:
+        c = DriftGuardConfig()
+        assert c.notification.enabled is False
+        assert c.notification.channels == []
+        assert c.notification.on_breaking is True
+        assert c.notification.on_warning is False
+
+    def test_notification_config(self) -> None:
+        n = NotificationConfig(enabled=True, channels=["slack"], webhook_url="https://hooks.example.com/drift")
+        c = DriftGuardConfig(notification=n)
+        assert c.notification.enabled is True
+        assert c.notification.webhook_url == "https://hooks.example.com/drift"
 
     def test_with_sources(self) -> None:
         c = DriftGuardConfig(

@@ -34,15 +34,29 @@ class PolicyOverride(BaseModel):
     severity: str = Field(description="Override severity: breaking, warning, info, ignore")
 
 
+class NotificationConfig(BaseModel):
+    """Notification settings for drift alerts."""
+
+    enabled: bool = False
+    channels: list[str] = Field(default_factory=list, description="Notification channels: slack, email, webhook")
+    webhook_url: str | None = Field(default=None, description="Webhook URL for notifications")
+    on_breaking: bool = True
+    on_warning: bool = False
+
+
 class DriftGuardConfig(BaseModel):
     """Top-level DriftGuard configuration."""
 
     version: str = "1"
+    schema_version: int = Field(default=1, description="Config schema version for migration support")
     project_name: str | None = Field(default=None, description="Project name for reports and snapshots")
+    environment: str | None = Field(default=None, description="Environment: dev, staging, production")
+    owner_team: str | None = Field(default=None, description="Team owning this project's contracts")
     snapshot_dir: str = ".driftguard/snapshots"
     sources: list[SourceConfig] = Field(default_factory=list)
     policy_overrides: list[PolicyOverride] = Field(default_factory=list)
     report_formats: list[str] = Field(default_factory=lambda: ["terminal"])
+    notification: NotificationConfig = Field(default_factory=NotificationConfig)
 
 
 def load_config(path: str | Path = "driftguard.yaml") -> DriftGuardConfig:

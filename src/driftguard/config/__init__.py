@@ -2,6 +2,7 @@
 
 from driftguard.config.models import (
     DriftGuardConfig,
+    NotificationConfig,
     PolicyOverride,
     SourceConfig,
     default_config,
@@ -11,6 +12,7 @@ from driftguard.config.models import (
 
 __all__ = [
     "DriftGuardConfig",
+    "NotificationConfig",
     "PolicyOverride",
     "SourceConfig",
     "default_config",
