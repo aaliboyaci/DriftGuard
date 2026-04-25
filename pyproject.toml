@@ -48,8 +48,11 @@ dev = [
 driftguard = "driftguard.cli.app:app"
 
 [project.urls]
+Homepage = "https://github.com/aaliboyaci/DriftGuard"
 Repository = "https://github.com/aaliboyaci/DriftGuard"
+Documentation = "https://github.com/aaliboyaci/DriftGuard/tree/main/docs"
 Issues = "https://github.com/aaliboyaci/DriftGuard/issues"
+Changelog = "https://github.com/aaliboyaci/DriftGuard/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/driftguard"]
