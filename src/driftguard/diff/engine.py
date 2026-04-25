@@ -101,9 +101,9 @@ def _diff_resource(baseline: ResourceSchema, current: ResourceSchema) -> list[Di
     return events
 
 
-def _diff_field(resource_name: str, baseline: "FieldDef", current: "FieldDef") -> list[DiffEvent]:  # type: ignore[name-defined]  # noqa: F821
+def _diff_field(resource_name: str, baseline: FieldDef, current: FieldDef) -> list[DiffEvent]:  # type: ignore[name-defined]  # noqa: F821
     """Compare two versions of the same field and return change events."""
-    from driftguard.schema.models import FieldDef as _FieldDef  # noqa: F811
+    from driftguard.schema.models import FieldDef as _FieldDef
 
     assert isinstance(baseline, _FieldDef)
     assert isinstance(current, _FieldDef)

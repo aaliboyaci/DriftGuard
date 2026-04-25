@@ -5,7 +5,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from driftguard.cli.app import app
-from driftguard.config.models import save_config, DriftGuardConfig, SourceConfig
+from driftguard.config.models import DriftGuardConfig, save_config
 from driftguard.schema.models import (
     ContractSnapshot,
     FieldDef,

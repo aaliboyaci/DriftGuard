@@ -6,7 +6,6 @@ Default location: .driftguard/snapshots/
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from driftguard.schema.models import ContractSnapshot

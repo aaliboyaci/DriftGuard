@@ -2,15 +2,7 @@
 
 from driftguard.diff.engine import compute_diff
 from driftguard.diff.events import (
-    EnumValuesChanged,
-    FieldAdded,
-    FieldRemoved,
     FieldRenamed,
-    NullableChanged,
-    RequiredChanged,
-    ResourceAdded,
-    ResourceRemoved,
-    TypeChanged,
 )
 from driftguard.policy.engine import evaluate
 from driftguard.policy.models import Severity

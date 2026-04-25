@@ -81,7 +81,7 @@ class TestMarkdownReporter:
         diff_result, policy_result = _make_diff_and_policy()
         output = MarkdownReporter().render(diff_result, policy_result)
         # Count table data rows (skip header + separator)
-        table_lines = [l for l in output.split("\n") if l.startswith("| **")]
+        table_lines = [line for line in output.split("\n") if line.startswith("| **")]
         assert len(table_lines) == 3  # 3 changes
 
     def test_empty_diff(self) -> None:

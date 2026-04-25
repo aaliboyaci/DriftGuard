@@ -5,9 +5,8 @@ Provides commands: init, snapshot, diff, check, report.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -40,7 +39,7 @@ def _version_callback(value: bool) -> None:
 
 @app.callback()
 def main(
-    version: Optional[bool] = typer.Option(  # noqa: UP007
+    version: bool | None = typer.Option(
         None, "--version", "-v", help="Show version", callback=_version_callback, is_eager=True
     ),
 ) -> None:
@@ -88,7 +87,7 @@ def snapshot(
 
     snap = ContractSnapshot(
         name=name,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         resources=resources,
     )
     path = store.save(snap)
@@ -201,7 +200,7 @@ def _load_config(path: str) -> DriftGuardConfig:
     except FileNotFoundError:
         console.print(f"[red]Config not found: {path}[/red]")
         console.print("Run 'driftguard init' to create one.")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
 def _load_snapshot(store: LocalStore, name: str) -> ContractSnapshot:
@@ -209,11 +208,16 @@ def _load_snapshot(store: LocalStore, name: str) -> ContractSnapshot:
         return store.load(name)
     except FileNotFoundError:
         console.print(f"[red]Snapshot not found: {name}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
-def _create_collector(source: "SourceConfig") -> "BaseCollector | None":  # type: ignore[name-defined]  # noqa: F821
-    from driftguard.collectors import CsvCollector, JsonSchemaCollector, OpenApiCollector, PostgresCollector
+def _create_collector(source: SourceConfig) -> BaseCollector | None:  # type: ignore[name-defined]  # noqa: F821
+    from driftguard.collectors import (
+        CsvCollector,
+        JsonSchemaCollector,
+        OpenApiCollector,
+        PostgresCollector,
+    )
     from driftguard.config.models import SourceConfig
 
     assert isinstance(source, SourceConfig)
@@ -242,12 +246,12 @@ def _create_collector(source: "SourceConfig") -> "BaseCollector | None":  # type
             return None
 
 
-def _generate_report(format: str, diff_result: "DiffResult", policy_result: "PolicyResult") -> str:  # type: ignore[name-defined]  # noqa: F821, A002
+def _generate_report(format: str, diff_result: DiffResult, policy_result: PolicyResult) -> str:  # type: ignore[name-defined]  # noqa: F821
     from driftguard.diff.events import DiffResult as _DiffResult
     from driftguard.policy.models import PolicyResult as _PolicyResult
+    from driftguard.reporters.html import HtmlReporter
     from driftguard.reporters.json_reporter import JsonReporter
     from driftguard.reporters.markdown import MarkdownReporter
-    from driftguard.reporters.html import HtmlReporter
 
     assert isinstance(diff_result, _DiffResult)
     assert isinstance(policy_result, _PolicyResult)

@@ -1,6 +1,6 @@
 """Tests for policy decision models."""
 
-from driftguard.diff import FieldRemoved, FieldAdded, TypeChanged
+from driftguard.diff import FieldAdded, FieldRemoved, TypeChanged
 from driftguard.policy import PolicyDecision, PolicyResult, Severity
 
 

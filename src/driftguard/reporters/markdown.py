@@ -25,8 +25,8 @@ class MarkdownReporter:
 
         lines.append("## Summary")
         lines.append("")
-        lines.append(f"| Metric | Count |")
-        lines.append(f"|--------|-------|")
+        lines.append("| Metric | Count |")
+        lines.append("|--------|-------|")
         lines.append(f"| Total changes | {diff_result.event_count} |")
         lines.append(f"| Breaking | {policy_result.breaking_count} |")
         lines.append(f"| Warning | {policy_result.warning_count} |")

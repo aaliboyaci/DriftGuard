@@ -80,7 +80,7 @@ class TestLoadConfig:
         config_data = {"sources": [{"name": "x", "type": "invalid_db"}]}
         path = tmp_path / "driftguard.yaml"
         path.write_text(yaml.dump(config_data), encoding="utf-8")
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             load_config(path)
 
 

@@ -1,5 +1,9 @@
 # DriftGuard
 
+[![CI](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 **Enterprise Data Contract & Schema Drift Monitor**
 
 DriftGuard is a Python CLI tool that detects schema and data contract drift across databases, APIs and files before it breaks production pipelines. It compares current contracts with a saved baseline, classifies changes by risk, and fails CI when a breaking change is detected.
@@ -46,7 +50,24 @@ driftguard snapshot --name current
 driftguard diff --baseline baseline --current current
 
 # CI gate: exits non-zero on breaking changes
-driftguard check --baseline baseline
+driftguard check --baseline baseline --current current
+```
+
+## Example Output
+
+```
+Schema Drift Report: baseline -> current
+Changes: 8 | Breaking: 3 | Warnings: 4 | Info: 1
+
+┌────────────┬──────────┬─────────────────────────────────────────┬──────────────────────────────────────┐
+│ Severity   │ Resource │ Change                                  │ Reason                               │
+├────────────┼──────────┼─────────────────────────────────────────┼──────────────────────────────────────┤
+│ [X] BREAK  │ users    │ Field removed: users.email (string)     │ Consumers expecting this field fail  │
+│ [X] BREAK  │ users    │ Field added: users.phone (string)       │ Adding required field may break      │
+│ [!] WARN   │ users    │ Enum values changed: users.status       │ Strict consumers may not handle      │
+│ [!] WARN   │ orders   │ Type changed: orders.amount (int→num)   │ Type widened; some may accept        │
+│ [i] INFO   │ payments │ Resource added: payments                │ Backward compatible                  │
+└────────────┴──────────┴─────────────────────────────────────────┴──────────────────────────────────────┘
 ```
 
 ## Architecture
@@ -78,9 +99,9 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 | Field removed | `breaking` | Consumers expecting this field will fail |
 | Required field added | `breaking` | Producer/consumer validation may break |
 | Column renamed | `breaking` | Effectively a remove + add |
-| Type string → integer | `breaking` | Parse and validation behavior changes |
-| Type integer → number | `warning` | May be acceptable but carries risk |
-| Nullable false → true | `warning` | Consumers without null handling may fail |
+| Type string -> integer | `breaking` | Parse and validation behavior changes |
+| Type integer -> number | `warning` | May be acceptable but carries risk |
+| Nullable false -> true | `warning` | Consumers without null handling may fail |
 | Enum value added | `warning` | Strict enum consumers may break |
 | Optional field added | `info` | Backward compatible |
 
@@ -88,12 +109,26 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 
 | Source | Status |
 |---|---|
-| PostgreSQL | MVP |
-| OpenAPI / JSON Schema | MVP |
-| JSON payload | MVP |
-| CSV / Parquet | MVP |
+| PostgreSQL | Supported |
+| OpenAPI / JSON Schema | Supported |
+| JSON payload | Supported |
+| CSV / Parquet | Supported |
 | MongoDB | Planned |
 | Kafka / Avro | Planned |
+
+## CI Integration (GitHub Actions)
+
+```yaml
+- name: Install DriftGuard
+  run: pip install driftguard
+
+- name: Check for drift
+  run: driftguard check --baseline baseline --current current
+
+- name: Generate report
+  if: always()
+  run: driftguard report -b baseline -c current -f markdown -o drift-report.md
+```
 
 ## Development
 
@@ -101,8 +136,11 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 # Install in dev mode
 pip install -e ".[dev]"
 
-# Run tests
+# Run tests (152 tests)
 pytest
+
+# Run a single test
+pytest tests/unit/test_diff_engine.py::TestDiffEngineFields::test_type_changed -v
 
 # Lint & format
 ruff check src/ tests/
@@ -112,6 +150,13 @@ ruff format src/ tests/
 mypy src/
 ```
 
+## Documentation
+
+- [Architecture](docs/architecture.md) - System design and module responsibilities
+- [CLI Usage](docs/cli-usage.md) - Detailed command reference
+- [Policy Rules](docs/policy-rules.md) - Risk classification rules and overrides
+- [Writing Adapters](docs/adapters.md) - Guide to adding new source collectors
+
 ## Tech Stack
 
 - **Python 3.11+** with modern typing
@@ -120,6 +165,38 @@ mypy src/
 - **SQLAlchemy** + **psycopg** for DB introspection
 - **pytest** for testing
 - **ruff** + **mypy** for code quality
+- **GitHub Actions** for CI
+
+## Roadmap
+
+### v0.1.0 (Current)
+- Core diff engine with semantic change detection
+- Policy engine with risk classification
+- CLI with init, snapshot, diff, check, report commands
+- Collectors: PostgreSQL, OpenAPI, JSON Schema, CSV
+- Reporters: Terminal, JSON, Markdown, HTML
+
+### v0.2.0 (Planned)
+- MongoDB schema inference adapter
+- Kafka / Avro / Schema Registry support
+- S3 snapshot store backend
+- Policy override and allowlist system
+- PR comment reporter
+
+### v1.0.0 (Future)
+- Slack / webhook alerting
+- Trend reporting
+- Web dashboard
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch
+3. Add tests for new functionality
+4. Run `pytest` and `ruff check`
+5. Submit a PR
+
+See [Writing Adapters](docs/adapters.md) for adding new source collectors.
 
 ## License
 

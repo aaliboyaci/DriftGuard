@@ -4,52 +4,48 @@ All notable changes to DriftGuard will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.0] - 2025-04-25
 
 ### Added
-- pyproject.toml with hatchling build, all core + dev dependencies
-- .pre-commit-config.yaml with ruff and mypy hooks
-- MIT LICENSE
-- ruff (lint/format) and mypy (strict type-check) configuration in pyproject.toml
-- pytest configuration with testpaths and verbose output
-- CLI entrypoint: `driftguard` command via `driftguard.cli.app:app`
-- Full package structure: src/driftguard/ with cli, config, collectors, schema, diff, policy, reporters, store, integrations subpackages
-- Test directories: tests/unit, tests/integration, tests/golden
-- Example directories: postgres-demo, openapi-demo, file-schema-demo
-- py.typed marker for PEP 561 type stub support
-- README.md with problem statement, features, quick start, architecture, risk classification table
-- Core schema models: `ContractSnapshot`, `ResourceSchema`, `FieldDef`, `FieldConstraint`, `SourceType`
-- Diff event models: `FieldAdded`, `FieldRemoved`, `FieldRenamed`, `TypeChanged`, `NullableChanged`, `RequiredChanged`, `EnumValuesChanged`, `ResourceAdded`, `ResourceRemoved`
-- `DiffResult` container with filtering by category and resource
-- Policy models: `PolicyDecision`, `PolicyResult`, `Severity` with CI exit code support
-- 42 unit tests covering all core models (schema, diff events, policy)
-- Semantic diff engine: compares two snapshots producing field/resource-level DiffEvents
-- Policy engine: evaluates DiffEvents with risk rules (widening transitions, nullable, enum, required)
-- Golden test fixtures: baseline + breaking + clean snapshot pairs
-- 95 total tests: diff engine (18), policy engine (18), golden tests (17), model tests (42)
-- `LocalStore`: JSON-based snapshot read/write with versioning, list, delete
-- `DriftGuardConfig`: YAML-based config with source definitions and policy overrides
-- `load_config` / `save_config` / `default_config` utilities
-- 116 total tests passing
-- `BaseCollector` abstract interface for all source adapters
-- `JsonSchemaCollector`: extracts fields from JSON Schema files (type, nullable, enum, default)
-- `OpenApiCollector`: extracts component schemas from OpenAPI 3.x / Swagger 2.x specs
-- `CsvCollector`: infers field types from CSV headers and sample data
-- `PostgresCollector`: SQLAlchemy-based introspection with PK, FK, unique constraint detection
-- Test fixtures: sample JSON Schema, OpenAPI YAML, CSV files
-- 134 total tests passing
-- Typer CLI with commands: `init`, `snapshot`, `diff`, `check`, `report`
-- `--version` flag and auto source collector dispatch
+
+#### Core
+- Pydantic v2 schema models: `ContractSnapshot`, `ResourceSchema`, `FieldDef`, `FieldConstraint`, `SourceType`
+- Semantic diff engine: compares snapshots producing field/resource-level `DiffEvent`s
+- Policy engine: classifies changes as breaking/warning/info with type widening detection
+- Diff event types: `FieldAdded`, `FieldRemoved`, `FieldRenamed`, `TypeChanged`, `NullableChanged`, `RequiredChanged`, `EnumValuesChanged`, `ResourceAdded`, `ResourceRemoved`
+
+#### CLI
+- Typer-based CLI with commands: `init`, `snapshot`, `diff`, `check`, `report`
 - CI gate: `check` command exits non-zero on breaking changes
+- `--version` flag and auto source collector dispatch
+
+#### Collectors
+- `BaseCollector` abstract interface for pluggable adapters
+- `PostgresCollector`: SQLAlchemy-based introspection with PK, FK, unique constraints
+- `OpenApiCollector`: OpenAPI 3.x / Swagger 2.x component schema extraction
+- `JsonSchemaCollector`: JSON Schema file parsing with type/nullable/enum/default
+- `CsvCollector`: CSV header + sample data type inference
+
+#### Reporters
 - Terminal reporter: Rich-based colored table output
 - JSON reporter: machine-readable structured output
 - Markdown reporter: CI artifact / PR comment format
 - HTML reporter: standalone styled report page
-- 152 total tests passing (11 CLI + 7 reporter tests added)
-- GitHub Actions CI workflow: lint + type-check + test across Python 3.11/3.12/3.13
-- DriftGuard self-check demo workflow for PRs with artifact upload
-- examples/openapi-demo: Pet Store API baseline vs current with breaking changes
-- examples/file-schema-demo: CSV schema drift detection demo
 
-### Fixed
-- pyproject.toml build-backend corrected from `hatchling.backends` to `hatchling.build`
+#### Infrastructure
+- `LocalStore`: versioned JSON snapshot read/write/list/delete
+- `DriftGuardConfig`: YAML config with source definitions and policy overrides
+- GitHub Actions CI: lint + type-check + test across Python 3.11/3.12/3.13
+- Self-check demo workflow for PRs with artifact upload
+- 152 tests passing (unit, golden, CLI, reporter)
+
+#### Documentation
+- Architecture guide with pipeline overview and extension points
+- CLI usage reference with all commands and options
+- Policy rules documentation with severity levels and overrides
+- Adapter development guide for adding new source collectors
+- README with badges, example output, roadmap, contributing guide
+
+#### Examples
+- openapi-demo: Pet Store API baseline vs current with breaking changes
+- file-schema-demo: CSV schema drift detection demo

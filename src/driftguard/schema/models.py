@@ -6,7 +6,7 @@ from any source (database, API, file). All collectors must produce these models.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -90,7 +90,7 @@ class ContractSnapshot(BaseModel):
     """
 
     name: str = Field(description="Snapshot identifier, e.g. 'baseline', 'v1.2.0', '2025-04-25'")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     resources: list[ResourceSchema] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 

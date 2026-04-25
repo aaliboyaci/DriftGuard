@@ -1,6 +1,6 @@
 """Tests for core schema models."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from driftguard.schema import (
     ContractSnapshot,
@@ -141,7 +141,7 @@ class TestContractSnapshot:
 
     def test_created_at_is_utc(self) -> None:
         s = ContractSnapshot(name="test")
-        assert s.created_at.tzinfo == timezone.utc
+        assert s.created_at.tzinfo == UTC
 
     def test_json_roundtrip(self) -> None:
         s = ContractSnapshot(

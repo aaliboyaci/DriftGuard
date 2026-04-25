@@ -146,7 +146,6 @@ class TestCsvCollector:
         assert collector.name == "csv:my_data"
 
     def test_empty_csv(self, tmp_path: "object") -> None:
-        import pytest
 
         p = Path(str(tmp_path)) / "empty.csv"
         p.write_text("", encoding="utf-8")

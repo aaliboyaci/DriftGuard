@@ -80,6 +80,7 @@ class PostgresCollector(BaseCollector):
                 for local_col, ref_col in zip(
                     fk.get("constrained_columns", []),
                     fk.get("referred_columns", []),
+                    strict=False,
                 ):
                     ref_table = fk.get("referred_table", "")
                     fk_map[local_col] = f"{ref_table}.{ref_col}"
