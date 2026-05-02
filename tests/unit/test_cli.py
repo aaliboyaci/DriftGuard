@@ -388,18 +388,14 @@ class TestCLIEdgeCases:
         assert result.exit_code == 1
 
     def test_report_missing_config(self) -> None:
-        result = runner.invoke(
-            app, ["report", "-b", "a", "-c", "b", "--config", "/nonexistent.yaml"]
-        )
+        result = runner.invoke(app, ["report", "-b", "a", "-c", "b", "--config", "/nonexistent.yaml"])
         assert result.exit_code == 1
 
     def test_diff_missing_snapshot(self, tmp_path: Path) -> None:
         config = DriftGuardConfig(snapshot_dir=str(tmp_path / "snaps"))
         config_path = tmp_path / "driftguard.yaml"
         save_config(config, config_path)
-        result = runner.invoke(
-            app, ["diff", "-b", "missing", "-c", "also-missing", "--config", str(config_path)]
-        )
+        result = runner.invoke(app, ["diff", "-b", "missing", "-c", "also-missing", "--config", str(config_path)])
         assert result.exit_code == 1
         assert "not found" in result.stdout.lower()
 
@@ -419,9 +415,7 @@ class TestCLIEdgeCases:
         config = DriftGuardConfig(snapshot_dir=str(snap_dir))
         config_path = tmp_path / "driftguard.yaml"
         save_config(config, config_path)
-        result = runner.invoke(
-            app, ["snapshots", "delete", "-n", "nonexistent", "--config", str(config_path)]
-        )
+        result = runner.invoke(app, ["snapshots", "delete", "-n", "nonexistent", "--config", str(config_path)])
         assert result.exit_code == 1
 
     def test_config_validate_missing(self) -> None:
@@ -442,24 +436,28 @@ class TestCLIEdgeCases:
         store = LocalStore(snap_dir)
         base = ContractSnapshot(
             name="b",
-            resources=[ResourceSchema(
-                name="t", source_type=SourceType.POSTGRES,
-                fields=[FieldDef(name="id", field_type="integer"), FieldDef(name="x", field_type="string")],
-            )],
+            resources=[
+                ResourceSchema(
+                    name="t",
+                    source_type=SourceType.POSTGRES,
+                    fields=[FieldDef(name="id", field_type="integer"), FieldDef(name="x", field_type="string")],
+                )
+            ],
         )
         curr = ContractSnapshot(
             name="c",
-            resources=[ResourceSchema(
-                name="t", source_type=SourceType.POSTGRES,
-                fields=[FieldDef(name="id", field_type="integer")],
-            )],
+            resources=[
+                ResourceSchema(
+                    name="t",
+                    source_type=SourceType.POSTGRES,
+                    fields=[FieldDef(name="id", field_type="integer")],
+                )
+            ],
         )
         store.save(base)
         store.save(curr)
         config = DriftGuardConfig(snapshot_dir=str(snap_dir))
         config_path = tmp_path / "driftguard.yaml"
         save_config(config, config_path)
-        result = runner.invoke(
-            app, ["report", "-b", "b", "-c", "c", "-f", "terminal", "--config", str(config_path)]
-        )
+        result = runner.invoke(app, ["report", "-b", "b", "-c", "c", "-f", "terminal", "--config", str(config_path)])
         assert result.exit_code == 0
