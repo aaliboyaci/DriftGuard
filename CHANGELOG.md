@@ -13,6 +13,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Demo summary line: breaking/warning/info counts in all formats
 - Clear CI verdict message at end of demo output
 - `make demo-html` Makefile target for HTML report generation
+- `examples/demo/` directory with baseline/current JSON, Markdown, and HTML sample reports
+- Demo CLI tests (6 tests) and demo golden tests (5 tests)
+- README Example Output updated with actual `driftguard demo` output
+
+### Changed
+- Tests increased from 190 to 201
 
 ## [0.2.0] - 2025-04-25
 

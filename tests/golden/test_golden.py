@@ -107,3 +107,120 @@ class TestGoldenIdentical:
         s = baseline_snapshot()
         result = evaluate(compute_diff(s, s))
         assert result.exit_code == 0
+
+
+class TestGoldenDemoScenario:
+    """Verify the demo scenario produces stable reporter output."""
+
+    def _demo_snapshots(self):
+        from driftguard.schema.models import ContractSnapshot, FieldDef, ResourceSchema, SourceType
+
+        baseline = ContractSnapshot(
+            name="baseline",
+            resources=[
+                ResourceSchema(
+                    name="Pet",
+                    source_type=SourceType.OPENAPI,
+                    fields=[
+                        FieldDef(name="id", field_type="integer", required=True),
+                        FieldDef(name="name", field_type="string", required=True),
+                        FieldDef(
+                            name="status",
+                            field_type="string",
+                            required=True,
+                            enum_values=["available", "pending", "sold"],
+                        ),
+                        FieldDef(name="tag", field_type="string", required=False),
+                    ],
+                ),
+                ResourceSchema(
+                    name="Owner",
+                    source_type=SourceType.OPENAPI,
+                    fields=[
+                        FieldDef(name="id", field_type="integer", required=True),
+                        FieldDef(name="email", field_type="string", required=True),
+                        FieldDef(name="phone", field_type="string", required=False),
+                    ],
+                ),
+            ],
+        )
+        current = ContractSnapshot(
+            name="current",
+            resources=[
+                ResourceSchema(
+                    name="Pet",
+                    source_type=SourceType.OPENAPI,
+                    fields=[
+                        FieldDef(name="id", field_type="integer", required=True),
+                        FieldDef(name="name", field_type="string", required=True),
+                        FieldDef(
+                            name="status",
+                            field_type="string",
+                            required=True,
+                            enum_values=["available", "pending", "sold", "archived"],
+                        ),
+                        FieldDef(name="category", field_type="string", required=True),
+                    ],
+                ),
+                ResourceSchema(
+                    name="Owner",
+                    source_type=SourceType.OPENAPI,
+                    fields=[
+                        FieldDef(name="id", field_type="string", required=True),
+                        FieldDef(name="email", field_type="string", required=True),
+                        FieldDef(name="phone", field_type="string", required=False),
+                        FieldDef(name="address", field_type="string", required=False),
+                    ],
+                ),
+            ],
+        )
+        return baseline, current
+
+    def test_demo_diff_counts(self) -> None:
+        baseline, current = self._demo_snapshots()
+        diff = compute_diff(baseline, current)
+        assert diff.event_count == 5
+
+    def test_demo_policy_counts(self) -> None:
+        baseline, current = self._demo_snapshots()
+        diff = compute_diff(baseline, current)
+        policy = evaluate(diff)
+        assert policy.breaking_count == 2
+        assert policy.warning_count == 2
+        assert policy.info_count == 1
+
+    def test_demo_json_report_stable(self) -> None:
+        import json
+
+        from driftguard.reporters.json_reporter import JsonReporter
+
+        baseline, current = self._demo_snapshots()
+        diff = compute_diff(baseline, current)
+        policy = evaluate(diff)
+        output = JsonReporter().render(diff, policy)
+        data = json.loads(output)
+        assert data["summary"]["breaking"] == 2
+        assert data["summary"]["total_changes"] == 5
+        assert len(data["changes"]) == 5
+
+    def test_demo_markdown_report_stable(self) -> None:
+        from driftguard.reporters.markdown import MarkdownReporter
+
+        baseline, current = self._demo_snapshots()
+        diff = compute_diff(baseline, current)
+        policy = evaluate(diff)
+        output = MarkdownReporter().render(diff, policy)
+        assert "# Schema Drift Report" in output
+        assert "| **BREAKING**" in output
+        assert output.count("**BREAKING**") == 2
+
+    def test_demo_html_report_stable(self) -> None:
+        from driftguard.reporters.html import HtmlReporter
+
+        baseline, current = self._demo_snapshots()
+        diff = compute_diff(baseline, current)
+        policy = evaluate(diff)
+        output = HtmlReporter().render(diff, policy)
+        assert "<html" in output
+        assert "BREAKING" in output
+        assert output.count("BREAKING") >= 2

@@ -1,0 +1,47 @@
+{
+  "baseline": "baseline",
+  "current": "current",
+  "summary": {
+    "total_changes": 5,
+    "breaking": 2,
+    "warning": 2,
+    "info": 1
+  },
+  "changes": [
+    {
+      "severity": "info",
+      "category": "field_added",
+      "resource": "Owner",
+      "description": "Field added: Owner.address (string)",
+      "reason": "Adding an optional field is backward compatible"
+    },
+    {
+      "severity": "warning",
+      "category": "type_changed",
+      "resource": "Owner",
+      "description": "Type changed: Owner.id (integer -> string)",
+      "reason": "Type widened from integer to string; some consumers may accept this"
+    },
+    {
+      "severity": "breaking",
+      "category": "field_removed",
+      "resource": "Pet",
+      "description": "Field removed: Pet.tag (string)",
+      "reason": "Consumers expecting this field will fail"
+    },
+    {
+      "severity": "breaking",
+      "category": "field_added",
+      "resource": "Pet",
+      "description": "Field added: Pet.category (string)",
+      "reason": "Adding a required field may break existing producers/consumers"
+    },
+    {
+      "severity": "warning",
+      "category": "enum_values_changed",
+      "resource": "Pet",
+      "description": "Enum values changed: Pet.status",
+      "reason": "Enum values added: archived; strict consumers may not handle new values"
+    }
+  ]
+}

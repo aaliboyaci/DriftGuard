@@ -331,3 +331,47 @@ class TestReportCommand:
         content = output.read_text(encoding="utf-8")
         assert "<html" in content
         assert "DriftGuard Report" in content
+
+
+class TestDemoCommand:
+    def test_demo_default_terminal(self) -> None:
+        result = runner.invoke(app, ["demo"])
+        assert result.exit_code == 0
+        assert "DriftGuard Demo" in result.stdout
+        assert "BREAKING CHANGES DETECTED" in result.stdout
+        assert "CI check would fail" in result.stdout
+        assert "Summary:" in result.stdout
+
+    def test_demo_format_json(self) -> None:
+        result = runner.invoke(app, ["demo", "--format", "json"])
+        assert result.exit_code == 0
+        assert '"breaking": 2' in result.stdout
+        assert '"total_changes": 5' in result.stdout
+        assert '"severity"' in result.stdout
+
+    def test_demo_format_markdown(self) -> None:
+        result = runner.invoke(app, ["demo", "--format", "markdown"])
+        assert result.exit_code == 0
+        assert "# Schema Drift Report" in result.stdout
+        assert "BREAKING" in result.stdout
+
+    def test_demo_format_html(self) -> None:
+        result = runner.invoke(app, ["demo", "--format", "html"])
+        assert result.exit_code == 0
+        assert "<html" in result.stdout
+        assert "DriftGuard Report" in result.stdout
+
+    def test_demo_output_to_file(self, tmp_path: Path) -> None:
+        output = tmp_path / "demo.html"
+        result = runner.invoke(app, ["demo", "--format", "html", "--output", str(output)])
+        assert result.exit_code == 0
+        assert "Report saved" in result.stdout
+        content = output.read_text(encoding="utf-8")
+        assert "<html" in content
+
+    def test_demo_summary_counts(self) -> None:
+        result = runner.invoke(app, ["demo"])
+        assert result.exit_code == 0
+        assert "2 breaking" in result.stdout
+        assert "2 warning" in result.stdout
+        assert "1 info" in result.stdout

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DriftGuard Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2rem; color: #333; }
+    h1 { color: #1a1a2e; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #dee2e6; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f8f9fa; font-weight: 600; }
+    .summary { display: flex; gap: 2rem; margin: 1rem 0; }
+    .stat { padding: 0.5rem 1rem; border-radius: 6px; background: #f8f9fa; }
+    .stat strong { font-size: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Schema Drift Report</h1>
+  <p><strong>Baseline:</strong> baseline &rarr; <strong>Current:</strong> current</p>
+  <div class="summary">
+    <div class="stat"><strong>5</strong><br>Total</div>
+    <div class="stat" style="border-left:4px solid #dc3545"><strong>2</strong><br>Breaking</div>
+    <div class="stat" style="border-left:4px solid #ffc107"><strong>2</strong><br>Warning</div>
+    <div class="stat" style="border-left:4px solid #0d6efd"><strong>1</strong><br>Info</div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Severity</th><th>Resource</th><th>Change</th><th>Reason</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><span style="background:#0d6efd;color:#fff;padding:2px 8px;border-radius:3px;font-weight:bold">INFO</span></td>
+          <td>Owner</td>
+          <td>Field added: Owner.address (string)</td>
+          <td>Adding an optional field is backward compatible</td>
+        </tr>
+        <tr>
+          <td><span style="background:#ffc107;color:#fff;padding:2px 8px;border-radius:3px;font-weight:bold">WARNING</span></td>
+          <td>Owner</td>
+          <td>Type changed: Owner.id (integer -> string)</td>
+          <td>Type widened from integer to string; some consumers may accept this</td>
+        </tr>
+        <tr>
+          <td><span style="background:#dc3545;color:#fff;padding:2px 8px;border-radius:3px;font-weight:bold">BREAKING</span></td>
+          <td>Pet</td>
+          <td>Field removed: Pet.tag (string)</td>
+          <td>Consumers expecting this field will fail</td>
+        </tr>
+        <tr>
+          <td><span style="background:#dc3545;color:#fff;padding:2px 8px;border-radius:3px;font-weight:bold">BREAKING</span></td>
+          <td>Pet</td>
+          <td>Field added: Pet.category (string)</td>
+          <td>Adding a required field may break existing producers/consumers</td>
+        </tr>
+        <tr>
+          <td><span style="background:#ffc107;color:#fff;padding:2px 8px;border-radius:3px;font-weight:bold">WARNING</span></td>
+          <td>Pet</td>
+          <td>Enum values changed: Pet.status</td>
+          <td>Enum values added: archived; strict consumers may not handle new values</td>
+        </tr>
+    </tbody>
+  </table>
+</body>
+</html>

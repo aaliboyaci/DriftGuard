@@ -1,0 +1,115 @@
+{
+  "name": "baseline",
+  "created_at": "2026-05-02T22:24:03.950171Z",
+  "schema_version": 1,
+  "created_by": null,
+  "git_commit_sha": null,
+  "branch_name": null,
+  "source_hash": null,
+  "collector_version": null,
+  "environment": null,
+  "tags": [],
+  "description": null,
+  "resources": [
+    {
+      "name": "Pet",
+      "source_type": "openapi",
+      "fields": [
+        {
+          "name": "id",
+          "field_type": "integer",
+          "nullable": false,
+          "required": true,
+          "default": null,
+          "description": null,
+          "enum_values": null,
+          "constraints": null,
+          "metadata": {}
+        },
+        {
+          "name": "name",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "default": null,
+          "description": null,
+          "enum_values": null,
+          "constraints": null,
+          "metadata": {}
+        },
+        {
+          "name": "status",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "default": null,
+          "description": null,
+          "enum_values": [
+            "available",
+            "pending",
+            "sold"
+          ],
+          "constraints": null,
+          "metadata": {}
+        },
+        {
+          "name": "tag",
+          "field_type": "string",
+          "nullable": false,
+          "required": false,
+          "default": null,
+          "description": null,
+          "enum_values": null,
+          "constraints": null,
+          "metadata": {}
+        }
+      ],
+      "version": null,
+      "description": null,
+      "metadata": {}
+    },
+    {
+      "name": "Owner",
+      "source_type": "openapi",
+      "fields": [
+        {
+          "name": "id",
+          "field_type": "integer",
+          "nullable": false,
+          "required": true,
+          "default": null,
+          "description": null,
+          "enum_values": null,
+          "constraints": null,
+          "metadata": {}
+        },
+        {
+          "name": "email",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "default": null,
+          "description": null,
+          "enum_values": null,
+          "constraints": null,
+          "metadata": {}
+        },
+        {
+          "name": "phone",
+          "field_type": "string",
+          "nullable": false,
+          "required": false,
+          "default": null,
+          "description": null,
+          "enum_values": null,
+          "constraints": null,
+          "metadata": {}
+        }
+      ],
+      "version": null,
+      "description": null,
+      "metadata": {}
+    }
+  ],
+  "metadata": {}
+}

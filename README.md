@@ -5,7 +5,7 @@ Catch breaking data contract changes before production.
 [![CI](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-190%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-201%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-78%25-yellow.svg)](#testing)
 
 DriftGuard is a Python CLI for detecting schema drift and breaking contract changes across APIs, databases, files, and event streams.
@@ -37,27 +37,43 @@ This runs a self-contained demo — no config, no database, no files needed. You
 ## Example Output
 
 ```
-$ driftguard check --baseline baseline --current current
+$ driftguard demo
+
+DriftGuard Demo
+Simulating a Pet Store API schema change...
+
+1. Creating baseline snapshot (v1.0)...
+2. Creating current snapshot (v1.1) with schema changes...
+   - Pet.tag removed
+   - Pet.category added (required)
+   - Pet.status enum: +archived
+   - Owner.id type: integer -> string
+   - Owner.address added (optional)
+
+3. Running semantic diff...
 
 Schema Drift Report: baseline -> current
 Changes: 5 | Breaking: 2 | Warnings: 2 | Info: 1
 
-+-------------------------------------------------------------------------------------------------------------------+
-| Severity   | Resource   | Change                                   | Reason                                      |
-|------------+------------+------------------------------------------+---------------------------------------------|
-|  INFO      | Owner      | Field added: Owner.address (string)      | Adding an optional field is backward        |
-|            |            |                                          | compatible                                  |
-| [!]        | Owner      | Type changed: Owner.id (integer ->       | Type widened from integer to string;        |
-| WARNING    |            | string)                                  | some consumers may accept this              |
-| [X]        | Pet        | Field removed: Pet.tag (string)          | Consumers expecting this field will fail    |
-| BREAKING   |            |                                          |                                             |
-| [X]        | Pet        | Field added: Pet.category (string)       | Adding a required field may break existing  |
-| BREAKING   |            |                                          | producers/consumers                         |
-| [!]        | Pet        | Enum values changed: Pet.status          | Enum values added: archived; strict         |
-| WARNING    |            |                                          | consumers may not handle new values         |
-+-------------------------------------------------------------------------------------------------------------------+
+  Severity   | Resource   | Change                              | Reason
+ ------------+------------+-------------------------------------+-------------------------------
+  INFO       | Owner      | Field added: Owner.address (string) | Adding an optional field is
+             |            |                                     | backward compatible
+  [!]        | Owner      | Type changed: Owner.id              | Type widened from integer to
+  WARNING    |            | (integer -> string)                 | string; some consumers may
+             |            |                                     | accept this
+  [X]        | Pet        | Field removed: Pet.tag (string)     | Consumers expecting this
+  BREAKING   |            |                                     | field will fail
+  [X]        | Pet        | Field added: Pet.category (string)  | Adding a required field may
+  BREAKING   |            |                                     | break existing producers
+  [!]        | Pet        | Enum values changed: Pet.status     | Enum values added: archived;
+  WARNING    |            |                                     | strict consumers may not
+             |            |                                     | handle new values
+
+Summary: 5 changes | 2 breaking | 2 warning | 1 info
 
 BREAKING CHANGES DETECTED: 2 breaking change(s)
+CI check would fail (exit code 1)
 ```
 
 ## Installation
@@ -175,7 +191,7 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 ## Testing
 
 ```
-190 tests | 78% coverage | Python 3.11 / 3.12 / 3.13
+201 tests | 78% coverage | Python 3.11 / 3.12 / 3.13
 ```
 
 | Suite | Count | What it covers |
@@ -186,9 +202,9 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 | Config | 17 | Load/save/validate, migration, notification settings |
 | Store | 17 | Save/load/delete, checksum, export/import, cleanup |
 | Reporters | 7 | Terminal, JSON, Markdown, HTML output |
-| CLI | 34 | All commands, exit codes, file outputs |
+| CLI | 17 | All commands including demo, exit codes, file outputs |
 | Collectors | 18 | PostgreSQL, OpenAPI, JSON Schema, CSV, SQLite |
-| Golden tests | 21 | Snapshot pairs with expected breaking/warning/info counts |
+| Golden tests | 22 | Snapshot pairs with expected breaking/warning/info counts |
 
 ```bash
 pytest                                    # run all
@@ -200,7 +216,7 @@ pytest --cov=driftguard                   # with coverage
 
 ```bash
 pip install -e ".[dev]"       # install in dev mode
-pytest                        # 190 tests
+pytest                        # 201 tests
 ruff check src/ tests/        # lint
 ruff format src/ tests/       # format
 mypy src/                     # type check
