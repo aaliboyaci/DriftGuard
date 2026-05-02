@@ -5,6 +5,17 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — v0.3.0
+
+### Added
+- **OpenAPI deep diff models:** `OpenApiContract`, `OpenApiPath`, `OpenApiOperation`, `OpenApiParameter`, `OpenApiRequestBody`, `OpenApiResponse`
+- **OpenAPI deep extractor:** path-level, method-level, query/path/header parameter, request body, response body, status code extraction
+- $ref resolution for request/response schemas
+- Path-level parameter inheritance with operation-level override
+- Swagger 2.x backward compatibility (body params, response schema)
+- 46 OpenAPI extractor tests (280 total)
+- Rich test fixture: `tests/fixtures/petstore_full.yaml`
+
 ## [0.2.5] - 2026-05-03
 
 ### Changed
