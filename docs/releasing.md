@@ -29,7 +29,7 @@
 [ ] Push tag: git push origin vX.Y.Z
 [ ] Create GitHub release (triggers PyPI publish workflow)
 [ ] Verify package on PyPI
-[ ] Verify install: pip install driftguard==X.Y.Z && driftguard demo
+[ ] Verify install: pip install driftguard-contracts==X.Y.Z && driftguard demo
 ```
 
 ## Semantic Versioning
@@ -42,8 +42,8 @@
 
 The `publish.yml` workflow uses PyPI trusted publishing (OIDC).
 No API tokens needed — configure at:
-- PyPI: https://pypi.org/manage/project/driftguard/settings/publishing/
-- TestPyPI: https://test.pypi.org/manage/project/driftguard/settings/publishing/
+- PyPI: https://pypi.org/manage/project/driftguard-contracts/settings/publishing/
+- TestPyPI: https://test.pypi.org/manage/project/driftguard-contracts/settings/publishing/
 
 Add the GitHub repository as a trusted publisher with:
 - Owner: `aaliboyaci`

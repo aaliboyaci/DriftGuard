@@ -19,7 +19,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install DriftGuard
-        run: pip install driftguard
+        run: pip install driftguard-contracts
 
       - name: Check for breaking changes
         run: driftguard check --baseline baseline --current current
@@ -42,7 +42,7 @@ jobs:
 drift-check:
   image: python:3.13
   script:
-    - pip install driftguard
+    - pip install driftguard-contracts
     - driftguard check --baseline baseline --current current
   artifacts:
     paths:

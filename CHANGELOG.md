@@ -5,6 +5,13 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-05-03
+
+### Changed
+- **Package renamed:** `driftguard` → `driftguard-contracts` (PyPI name `driftguard` was taken by unrelated project)
+- All docs, CI examples, and install commands updated to `pip install driftguard-contracts`
+- CLI command remains `driftguard` (unchanged)
+
 ## [0.2.4] - 2026-05-03
 
 ### Added

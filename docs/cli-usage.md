@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-pip install driftguard
+pip install driftguard-contracts
 ```
 
 ## Commands
@@ -118,7 +118,7 @@ report_formats:
 
 ```yaml
 - name: Install DriftGuard
-  run: pip install driftguard
+  run: pip install driftguard-contracts
 
 - name: Check for breaking changes
   run: driftguard check --baseline baseline --current current

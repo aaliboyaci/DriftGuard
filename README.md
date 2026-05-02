@@ -5,7 +5,7 @@ Catch breaking data contract changes before production.
 [![CI](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/driftguard.svg)](https://pypi.org/project/driftguard/)
+[![PyPI](https://img.shields.io/pypi/v/driftguard-contracts.svg)](https://pypi.org/project/driftguard-contracts/)
 [![Tests](https://img.shields.io/badge/tests-234%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](#testing)
 
@@ -18,7 +18,7 @@ DriftGuard is a Python CLI for detecting schema drift and breaking contract chan
 ## Try It Now
 
 ```bash
-pip install driftguard
+pip install driftguard-contracts
 driftguard demo
 ```
 
@@ -85,9 +85,9 @@ CI check would fail (exit code 1)
 ## Installation
 
 ```bash
-pip install driftguard        # pip
-uv pip install driftguard     # uv
-poetry add driftguard         # poetry
+pip install driftguard-contracts        # pip
+uv pip install driftguard-contracts     # uv
+poetry add driftguard-contracts         # poetry
 ```
 
 ## Quick Start
@@ -156,7 +156,7 @@ It is a **contract drift detector**: snapshot, compare, classify, gate.
 ```yaml
 # .github/workflows/drift-check.yml
 - name: Install DriftGuard
-  run: pip install driftguard
+  run: pip install driftguard-contracts
 
 - name: Check for drift
   run: driftguard check --baseline baseline --current current

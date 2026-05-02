@@ -27,7 +27,7 @@ See [CHANGELOG.md](https://github.com/aaliboyaci/DriftGuard/blob/main/CHANGELOG.
 ## Installation
 
 ```bash
-pip install driftguard==VERSION
+pip install driftguard-contracts==VERSION
 ```
 
 ## Contributors

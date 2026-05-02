@@ -3,7 +3,7 @@
 ## 1. Install
 
 ```bash
-pip install driftguard
+pip install driftguard-contracts
 ```
 
 ## 2. Try the Demo
