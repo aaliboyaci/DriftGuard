@@ -5,6 +5,16 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-05-03
+
+### Added
+- PyPI publish workflow with GitHub trusted publishing (OIDC)
+- `docs/releasing.md` with version bump process and release checklist
+- PyPI version badge in README
+
+### Changed
+- Package builds verified: wheel, sdist, twine check all pass
+
 ## [0.2.1] - 2026-05-03
 
 ### Added

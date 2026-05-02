@@ -5,6 +5,7 @@ Catch breaking data contract changes before production.
 [![CI](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/aaliboyaci/DriftGuard/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/driftguard.svg)](https://pypi.org/project/driftguard/)
 [![Tests](https://img.shields.io/badge/tests-201%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-78%25-yellow.svg)](#testing)
 
