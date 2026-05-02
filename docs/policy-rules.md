@@ -55,6 +55,18 @@ boolean → string
 
 Any other type change is treated as **breaking**.
 
+## Policy Modes
+
+| Mode | Behavior |
+|------|----------|
+| `default` | Standard risk classification |
+| `strict` | Warnings → breaking, info → warning |
+| `lenient` | Breaking → warning (except resource removal) |
+| `backward_compatible` | Only additions are safe; warnings → breaking |
+| `forward_compatible` | Field additions become warnings |
+
+Modes are set in config or via the policy engine API. They apply after the default classification.
+
 ## Policy Overrides
 
 You can override default severity in `driftguard.yaml`:

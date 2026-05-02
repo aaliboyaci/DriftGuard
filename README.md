@@ -230,12 +230,22 @@ mypy src/                     # type check
 
 ## Documentation
 
-- [Architecture](docs/architecture.md) — System design and module responsibilities
+- [Quick Start](docs/quickstart.md) — Get running in 5 minutes
 - [CLI Usage](docs/cli-usage.md) — Detailed command reference
+- [CI Gate](docs/ci-gate.md) — CI/CD integration (GitHub Actions, GitLab CI)
 - [Policy Rules](docs/policy-rules.md) — Risk classification rules and overrides
+- [Supported Sources](docs/supported-sources.md) — All collectors and config examples
+- [Architecture](docs/architecture.md) — System design and module responsibilities
 - [Writing Adapters](docs/adapters.md) — Guide to adding new source collectors
+- [FAQ](docs/faq.md) — Common questions answered
 - [CHANGELOG](CHANGELOG.md) — Release history
 - [ROADMAP](ROADMAP.md) — Planned features
+
+### Case Studies
+
+- [OpenAPI Response Field Removed](docs/case-studies/openapi-field-removed.md)
+- [PostgreSQL Column Type Changed](docs/case-studies/postgres-type-changed.md)
+- [CSV Export Column Renamed](docs/case-studies/csv-column-renamed.md)
 
 ## Contributing
 

@@ -5,6 +5,17 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-05-03
+
+### Added
+- Case studies: OpenAPI field removed, PostgreSQL type changed, CSV column renamed
+- `docs/quickstart.md` — 5-minute getting started guide
+- `docs/ci-gate.md` — CI/CD integration for GitHub Actions and GitLab CI
+- `docs/supported-sources.md` — stable/beta/planned source table
+- `docs/faq.md` — common questions: migration tool, CI blocking, runtime, overrides
+- Policy modes table in `docs/policy-rules.md`
+- Case study links in README Documentation section
+
 ## [0.2.3] - 2026-05-03
 
 ### Added
