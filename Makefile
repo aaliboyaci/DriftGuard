@@ -3,6 +3,9 @@
 demo:  ## Run the built-in demo
 	driftguard demo
 
+demo-html:  ## Run demo and save HTML report
+	driftguard demo --format html --output demo-report.html
+
 install:  ## Install in production mode
 	pip install .
 

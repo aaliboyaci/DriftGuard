@@ -68,9 +68,11 @@ def init(
 
 
 @app.command()
-def demo() -> None:
+def demo(
+    format: str = typer.Option("terminal", "--format", "-f", help="Output format: terminal, json, markdown, html"),
+    output: str = typer.Option("", "--output", "-o", help="Output file path (stdout if empty)"),
+) -> None:
     """Run a self-contained demo showing DriftGuard in action."""
-    from driftguard.reporters.terminal import TerminalReporter
     from driftguard.schema.models import FieldDef, ResourceSchema
 
     console.print("\n[bold]DriftGuard Demo[/bold]")
@@ -149,8 +151,27 @@ def demo() -> None:
     diff_result = compute_diff(baseline, current)
     policy_result = evaluate(diff_result)
 
-    reporter = TerminalReporter(console)
-    reporter.report(diff_result, policy_result)
+    # --- Report ---
+    if format == "terminal":
+        from driftguard.reporters.terminal import TerminalReporter
+
+        reporter = TerminalReporter(console)
+        reporter.report(diff_result, policy_result)
+    else:
+        report_content = _generate_report(format, diff_result, policy_result)
+        if output:
+            Path(output).write_text(report_content, encoding="utf-8")
+            console.print(f"[green]Report saved: {output}[/green]")
+        else:
+            console.print(report_content)
+
+    # --- Summary ---
+    console.print(
+        f"\n[dim]Summary: {len(diff_result.events)} changes | "
+        f"{policy_result.breaking_count} breaking | "
+        f"{policy_result.warning_count} warning | "
+        f"{policy_result.info_count} info[/dim]"
+    )
 
     if policy_result.has_breaking:
         console.print(
@@ -159,13 +180,6 @@ def demo() -> None:
         console.print("[red]CI check would fail (exit code 1)[/red]")
     else:
         console.print("\n[green]No breaking changes. CI check would pass.[/green]")
-
-    console.print(
-        f"\n[dim]Summary: {len(diff_result.events)} changes | "
-        f"{policy_result.breaking_count} breaking | "
-        f"{policy_result.warning_count} warning | "
-        f"{policy_result.info_count} info[/dim]"
-    )
 
 
 @app.command()

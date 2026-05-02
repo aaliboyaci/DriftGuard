@@ -5,6 +5,15 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — v0.2.1
+
+### Added
+- `driftguard demo --format` option: terminal (default), json, markdown, html
+- `driftguard demo --output` option: save report to file
+- Demo summary line: breaking/warning/info counts in all formats
+- Clear CI verdict message at end of demo output
+- `make demo-html` Makefile target for HTML report generation
+
 ## [0.2.0] - 2025-04-25
 
 Config v2, Snapshot v2, new collectors, diff engine and policy engine enhancements, CLI UX improvements.
