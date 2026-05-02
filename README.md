@@ -76,6 +76,11 @@ BREAKING CHANGES DETECTED: 2 breaking change(s)
 CI check would fail (exit code 1)
 ```
 
+**What the risks mean:**
+- **BREAKING** — `Pet.tag` removed and `Pet.category` added as required: downstream consumers will fail.
+- **WARNING** — `Owner.id` type widened (integer → string) and `Pet.status` enum expanded: some consumers may not handle these.
+- **INFO** — `Owner.address` added as optional: safe, backward compatible.
+
 ## Installation
 
 ```bash
