@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "driftguard"
-version = "0.2.0"
+version = "0.2.1"
 description = "Detect schema and data contract drift across databases, APIs, and files before it breaks production"
 readme = "README.md"
 license = "MIT"

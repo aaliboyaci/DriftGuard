@@ -5,7 +5,7 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v0.2.1
+## [0.2.1] - 2026-05-03
 
 ### Added
 - `driftguard demo --format` option: terminal (default), json, markdown, html
