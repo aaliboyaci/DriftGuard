@@ -6,8 +6,8 @@ Catch breaking data contract changes before production.
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/driftguard.svg)](https://pypi.org/project/driftguard/)
-[![Tests](https://img.shields.io/badge/tests-201%20passed-brightgreen.svg)](#testing)
-[![Coverage](https://img.shields.io/badge/coverage-78%25-yellow.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-234%20passed-brightgreen.svg)](#testing)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](#testing)
 
 DriftGuard is a Python CLI for detecting schema drift and breaking contract changes across APIs, databases, files, and event streams.
 
@@ -197,18 +197,18 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 ## Testing
 
 ```
-201 tests | 78% coverage | Python 3.11 / 3.12 / 3.13
+234 tests | 85% coverage | Python 3.11 / 3.12 / 3.13
 ```
 
 | Suite | Count | What it covers |
 |---|---|---|
 | Diff engine | 29 | Field add/remove/rename, type/nullable/enum/constraint changes |
-| Policy engine | 25 | Risk classification, policy modes (strict/lenient/backward/forward) |
+| Policy engine | 33 | Risk classification, policy modes, FK/PK/index/constraint events |
 | Schema models | 22 | Pydantic models, serialization roundtrips, backward compat |
 | Config | 17 | Load/save/validate, migration, notification settings |
 | Store | 17 | Save/load/delete, checksum, export/import, cleanup |
 | Reporters | 7 | Terminal, JSON, Markdown, HTML output |
-| CLI | 17 | All commands including demo, exit codes, file outputs |
+| CLI | 26 | All commands, demo formats, edge cases, error handling |
 | Collectors | 18 | PostgreSQL, OpenAPI, JSON Schema, CSV, SQLite |
 | Golden tests | 22 | Snapshot pairs with expected breaking/warning/info counts |
 
@@ -222,7 +222,7 @@ pytest --cov=driftguard                   # with coverage
 
 ```bash
 pip install -e ".[dev]"       # install in dev mode
-pytest                        # 201 tests
+pytest                        # 234 tests
 ruff check src/ tests/        # lint
 ruff format src/ tests/       # format
 mypy src/                     # type check

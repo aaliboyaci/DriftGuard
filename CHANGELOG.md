@@ -5,6 +5,19 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-05-03
+
+### Added
+- YAML collector tests (16 tests, 0% → 100% coverage)
+- Policy engine edge case tests: DEFAULT_VALUE_CHANGED, CONSTRAINT_CHANGED, FK, PK, INDEX events
+- Policy mode edge case tests: strict info→warning, backward-compat warning→breaking, forward-compat field added
+- CLI edge case tests: missing config, missing snapshot, empty snapshot list, config validate
+- CLI report terminal format test
+
+### Changed
+- Coverage: 79% → 85% (target achieved)
+- Tests: 201 → 234
+
 ## [0.2.2] - 2026-05-03
 
 ### Added

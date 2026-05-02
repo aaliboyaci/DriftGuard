@@ -200,3 +200,105 @@ class TestPolicyEngineExitCode:
         s = _snap("v1", [_res("t", [_field("id")])])
         result = evaluate(compute_diff(s, s))
         assert result.exit_code == 0
+
+
+class TestPolicyEngineEventTypes:
+    """Cover policy decisions for constraint/FK/PK/index/default events."""
+
+    def test_default_value_changed_is_info(self) -> None:
+        from driftguard.diff.events import DefaultValueChanged, DiffResult
+
+        event = DefaultValueChanged(
+            resource_name="t",
+            description="Default changed: t.status",
+            field_name="status",
+            old_default="active",
+            new_default="pending",
+        )
+        diff = DiffResult(baseline_name="v1", current_name="v2", events=[event])
+        result = evaluate(diff)
+        assert result.info_count == 1
+        assert "default" in result.decisions[0].reason.lower()
+
+    def test_constraint_changed_is_warning(self) -> None:
+        from driftguard.diff.events import ConstraintChanged, DiffResult
+
+        event = ConstraintChanged(
+            resource_name="t",
+            description="Constraint changed: t.name max_length",
+            field_name="name",
+            constraint_type="max_length",
+            old_value="100",
+            new_value="50",
+        )
+        diff = DiffResult(baseline_name="v1", current_name="v2", events=[event])
+        result = evaluate(diff)
+        assert result.warning_count == 1
+
+    def test_foreign_key_changed_is_breaking(self) -> None:
+        from driftguard.diff.events import DiffResult, ForeignKeyChanged
+
+        event = ForeignKeyChanged(
+            resource_name="orders",
+            description="FK changed: orders.user_id",
+            field_name="user_id",
+            old_reference="users.id",
+            new_reference="accounts.id",
+        )
+        diff = DiffResult(baseline_name="v1", current_name="v2", events=[event])
+        result = evaluate(diff)
+        assert result.breaking_count == 1
+        assert "foreign key" in result.decisions[0].reason.lower()
+
+    def test_primary_key_changed_is_breaking(self) -> None:
+        from driftguard.diff.events import DiffResult, PrimaryKeyChanged
+
+        event = PrimaryKeyChanged(
+            resource_name="t",
+            description="PK changed: t",
+            old_fields=["id"],
+            new_fields=["id", "tenant_id"],
+        )
+        diff = DiffResult(baseline_name="v1", current_name="v2", events=[event])
+        result = evaluate(diff)
+        assert result.breaking_count == 1
+        assert "primary key" in result.decisions[0].reason.lower()
+
+    def test_index_changed_is_info(self) -> None:
+        from driftguard.diff.events import DiffResult, IndexChanged
+
+        event = IndexChanged(
+            resource_name="t",
+            description="Index added: idx_email",
+            index_name="idx_email",
+            change_type="added",
+        )
+        diff = DiffResult(baseline_name="v1", current_name="v2", events=[event])
+        result = evaluate(diff)
+        assert result.info_count == 1
+        assert "index" in result.decisions[0].reason.lower()
+
+
+class TestPolicyModeEdgeCases:
+    """Cover mode-specific branches not hit by other tests."""
+
+    def test_strict_promotes_info_to_warning(self) -> None:
+        base = _snap("v1", [_res("t", [_field("id")])])
+        curr = _snap("v2", [_res("t", [_field("id"), _field("phone", required=False)])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.STRICT)
+        assert result.warning_count >= 1
+        assert "[strict]" in result.decisions[0].reason
+
+    def test_backward_compat_promotes_warning_to_breaking(self) -> None:
+        base = _snap("v1", [_res("t", [_field("id", nullable=False)])])
+        curr = _snap("v2", [_res("t", [_field("id", nullable=True)])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.BACKWARD_COMPATIBLE)
+        assert result.breaking_count >= 1
+        assert "[backward-compat]" in result.decisions[0].reason
+
+    def test_forward_compat_warns_on_field_added(self) -> None:
+        base = _snap("v1", [_res("t", [_field("id")])])
+        curr = _snap("v2", [_res("t", [_field("id"), _field("phone", required=False)])])
+        result = evaluate(compute_diff(base, curr), mode=PolicyMode.FORWARD_COMPATIBLE)
+        assert result.warning_count >= 1
+        assert "[forward-compat]" in result.decisions[0].reason

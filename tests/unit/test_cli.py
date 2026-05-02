@@ -375,3 +375,91 @@ class TestDemoCommand:
         assert "2 breaking" in result.stdout
         assert "2 warning" in result.stdout
         assert "1 info" in result.stdout
+
+
+class TestCLIEdgeCases:
+    def test_diff_missing_config(self) -> None:
+        result = runner.invoke(app, ["diff", "-b", "a", "-c", "b", "--config", "/nonexistent.yaml"])
+        assert result.exit_code == 1
+        assert "not found" in result.stdout.lower() or "Config" in result.stdout
+
+    def test_check_missing_config(self) -> None:
+        result = runner.invoke(app, ["check", "-b", "a", "--config", "/nonexistent.yaml"])
+        assert result.exit_code == 1
+
+    def test_report_missing_config(self) -> None:
+        result = runner.invoke(
+            app, ["report", "-b", "a", "-c", "b", "--config", "/nonexistent.yaml"]
+        )
+        assert result.exit_code == 1
+
+    def test_diff_missing_snapshot(self, tmp_path: Path) -> None:
+        config = DriftGuardConfig(snapshot_dir=str(tmp_path / "snaps"))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(
+            app, ["diff", "-b", "missing", "-c", "also-missing", "--config", str(config_path)]
+        )
+        assert result.exit_code == 1
+        assert "not found" in result.stdout.lower()
+
+    def test_snapshots_list_empty(self, tmp_path: Path) -> None:
+        snap_dir = tmp_path / "snaps"
+        snap_dir.mkdir()
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(app, ["snapshots", "list", "--config", str(config_path)])
+        assert result.exit_code == 0
+        assert "No snapshots" in result.stdout
+
+    def test_snapshots_delete_missing(self, tmp_path: Path) -> None:
+        snap_dir = tmp_path / "snaps"
+        snap_dir.mkdir()
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(
+            app, ["snapshots", "delete", "-n", "nonexistent", "--config", str(config_path)]
+        )
+        assert result.exit_code == 1
+
+    def test_config_validate_missing(self) -> None:
+        result = runner.invoke(app, ["config", "validate", "--config", "/nonexistent.yaml"])
+        assert result.exit_code == 1
+        assert "not found" in result.stdout.lower()
+
+    def test_config_validate_valid(self, tmp_path: Path) -> None:
+        config = DriftGuardConfig()
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(app, ["config", "validate", "--config", str(config_path)])
+        assert result.exit_code == 0
+        assert "valid" in result.stdout.lower()
+
+    def test_report_terminal_format(self, tmp_path: Path) -> None:
+        snap_dir = tmp_path / "snaps"
+        store = LocalStore(snap_dir)
+        base = ContractSnapshot(
+            name="b",
+            resources=[ResourceSchema(
+                name="t", source_type=SourceType.POSTGRES,
+                fields=[FieldDef(name="id", field_type="integer"), FieldDef(name="x", field_type="string")],
+            )],
+        )
+        curr = ContractSnapshot(
+            name="c",
+            resources=[ResourceSchema(
+                name="t", source_type=SourceType.POSTGRES,
+                fields=[FieldDef(name="id", field_type="integer")],
+            )],
+        )
+        store.save(base)
+        store.save(curr)
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(
+            app, ["report", "-b", "b", "-c", "c", "-f", "terminal", "--config", str(config_path)]
+        )
+        assert result.exit_code == 0
