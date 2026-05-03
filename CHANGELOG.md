@@ -5,7 +5,7 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v0.3.0
+## [0.3.0] - 2026-05-03
 
 ### Added
 - **OpenAPI deep diff models:** `OpenApiContract`, `OpenApiPath`, `OpenApiOperation`, `OpenApiParameter`, `OpenApiRequestBody`, `OpenApiResponse`
@@ -20,7 +20,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **OpenAPI policy rules:** path/method/status removed = breaking, required param added = breaking, param became required = breaking, deprecated = warning, param removed = warning, path/method/status added = info
 - **Request/response field semantics:** required request field added = breaking, response field removed = breaking, optional response field added = info
 - 23 OpenAPI golden tests with baseline + breaking-current fixture pair
-- Tests: 280 → 303
+- `driftguard openapi diff` CLI command with `--format`, `--output`, `--only-breaking`
+- 7 OpenAPI CLI tests
+- `examples/openapi-deep-diff/` with baseline, current, Markdown and HTML reports
+- Tests: 234 → 310
 
 ## [0.2.5] - 2026-05-03
 

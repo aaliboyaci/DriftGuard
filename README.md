@@ -6,7 +6,7 @@ Catch breaking data contract changes before production.
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/driftguard-contracts.svg)](https://pypi.org/project/driftguard-contracts/)
-[![Tests](https://img.shields.io/badge/tests-234%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-310%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](#testing)
 
 DriftGuard is a Python CLI for detecting schema drift and breaking contract changes across APIs, databases, files, and event streams.
@@ -81,6 +81,34 @@ CI check would fail (exit code 1)
 - **BREAKING** — `Pet.tag` removed and `Pet.category` added as required: downstream consumers will fail.
 - **WARNING** — `Owner.id` type widened (integer → string) and `Pet.status` enum expanded: some consumers may not handle these.
 - **INFO** — `Owner.address` added as optional: safe, backward compatible.
+
+## OpenAPI Deep Diff
+
+Compare two OpenAPI specs directly — no config, no snapshots needed:
+
+```bash
+driftguard openapi diff baseline.yaml current.yaml
+```
+
+Detects path/method removals, parameter changes, request/response body field changes, status code changes, and deprecated endpoints with correct request vs response semantics:
+
+| Change | Risk | Why |
+|--------|------|-----|
+| Path removed | `breaking` | All consumers of this endpoint fail |
+| Method removed | `breaking` | Clients using this method get 405 |
+| Response status removed | `breaking` | Clients handling this status break |
+| Required param added | `breaking` | Existing clients don't send it |
+| Required request field added | `breaking` | Existing clients don't include it |
+| Response field removed | `breaking` | Consumers depending on this field fail |
+| Endpoint deprecated | `warning` | Plan migration before removal |
+| Optional param added | `info` | Backward compatible |
+| Response field added | `info` | Backward compatible |
+
+```bash
+driftguard openapi diff baseline.yaml current.yaml --format json
+driftguard openapi diff baseline.yaml current.yaml --only-breaking
+driftguard openapi diff baseline.yaml current.yaml -f html -o report.html
+```
 
 ## Installation
 
@@ -192,12 +220,12 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 | **Diff Engine** | Semantic comparison: rename detection, type/nullable/enum/constraint changes |
 | **Policy Engine** | Classify each change as breaking / warning / info with configurable modes |
 | **Reporters** | Terminal (Rich), JSON, Markdown, HTML |
-| **CLI** | `init`, `snapshot`, `diff`, `check`, `report`, `config`, `snapshots` |
+| **CLI** | `init`, `snapshot`, `diff`, `check`, `report`, `config`, `snapshots`, `openapi diff` |
 
 ## Testing
 
 ```
-234 tests | 85% coverage | Python 3.11 / 3.12 / 3.13
+310 tests | 85% coverage | Python 3.11 / 3.12 / 3.13
 ```
 
 | Suite | Count | What it covers |
@@ -222,7 +250,7 @@ pytest --cov=driftguard                   # with coverage
 
 ```bash
 pip install -e ".[dev]"       # install in dev mode
-pytest                        # 234 tests
+pytest                        # 310 tests
 ruff check src/ tests/        # lint
 ruff format src/ tests/       # format
 mypy src/                     # type check

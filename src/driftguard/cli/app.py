@@ -30,8 +30,10 @@ app = typer.Typer(
 )
 config_app = typer.Typer(name="config", help="Configuration management commands", no_args_is_help=True)
 snapshots_app = typer.Typer(name="snapshots", help="Snapshot management commands", no_args_is_help=True)
+openapi_app = typer.Typer(name="openapi", help="OpenAPI deep diff commands", no_args_is_help=True)
 app.add_typer(config_app)
 app.add_typer(snapshots_app)
+app.add_typer(openapi_app)
 console = Console()
 
 
@@ -408,6 +410,67 @@ def snapshots_delete(
     else:
         console.print(f"[red]Snapshot not found: {name}[/red]")
         raise typer.Exit(1)
+
+
+@openapi_app.command("diff")
+def openapi_diff(
+    baseline: str = typer.Argument(..., help="Baseline OpenAPI spec file"),
+    current: str = typer.Argument(..., help="Current OpenAPI spec file"),
+    format: str = typer.Option("terminal", "--format", "-f", help="Output format: terminal, json, markdown, html"),
+    output: str = typer.Option("", "--output", "-o", help="Output file path (stdout if empty)"),
+    only_breaking: bool = typer.Option(False, "--only-breaking", help="Show only breaking changes"),
+) -> None:
+    """Compare two OpenAPI specs and show semantic API contract differences."""
+    from driftguard.collectors.openapi_extractor import extract_openapi_contract
+    from driftguard.diff.openapi_engine import compute_openapi_diff
+    from driftguard.policy.models import Severity
+
+    baseline_path = Path(baseline)
+    current_path = Path(current)
+
+    if not baseline_path.exists():
+        console.print(f"[red]Baseline spec not found: {baseline}[/red]")
+        raise typer.Exit(1)
+    if not current_path.exists():
+        console.print(f"[red]Current spec not found: {current}[/red]")
+        raise typer.Exit(1)
+
+    baseline_contract = extract_openapi_contract(baseline_path)
+    current_contract = extract_openapi_contract(current_path)
+
+    diff_result = compute_openapi_diff(baseline_contract, current_contract)
+    policy_result = evaluate(diff_result)
+
+    if only_breaking:
+        policy_result.decisions = [d for d in policy_result.decisions if d.severity == Severity.BREAKING]
+
+    if format == "terminal":
+        from driftguard.reporters.terminal import TerminalReporter
+
+        reporter = TerminalReporter(console)
+        reporter.report(diff_result, policy_result)
+    else:
+        report_content = _generate_report(format, diff_result, policy_result)
+        if output:
+            Path(output).write_text(report_content, encoding="utf-8")
+            console.print(f"[green]Report saved: {output}[/green]")
+        else:
+            console.print(report_content)
+
+    console.print(
+        f"\n[dim]Summary: {diff_result.event_count} changes | "
+        f"{policy_result.breaking_count} breaking | "
+        f"{policy_result.warning_count} warning | "
+        f"{policy_result.info_count} info[/dim]"
+    )
+
+    if policy_result.has_breaking:
+        console.print(
+            f"\n[red bold]BREAKING CHANGES DETECTED: {policy_result.breaking_count} breaking change(s)[/red bold]"
+        )
+        raise typer.Exit(1)
+
+    console.print("\n[green]No breaking changes. API contract is safe.[/green]")
 
 
 def _load_config(path: str) -> DriftGuardConfig:

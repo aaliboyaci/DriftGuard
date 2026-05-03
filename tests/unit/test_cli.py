@@ -461,3 +461,98 @@ class TestCLIEdgeCases:
         save_config(config, config_path)
         result = runner.invoke(app, ["report", "-b", "b", "-c", "c", "-f", "terminal", "--config", str(config_path)])
         assert result.exit_code == 0
+
+
+FIXTURE_DIR = Path(__file__).parent.parent / "fixtures"
+
+
+class TestOpenApiDiffCommand:
+    def test_openapi_diff_terminal(self) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "openapi",
+                "diff",
+                str(FIXTURE_DIR / "openapi_baseline.yaml"),
+                str(FIXTURE_DIR / "openapi_breaking_current.yaml"),
+            ],
+        )
+        assert result.exit_code == 1  # has breaking changes
+        assert "BREAKING CHANGES DETECTED" in result.stdout
+        assert "Path removed" in result.stdout
+
+    def test_openapi_diff_json(self) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "openapi",
+                "diff",
+                str(FIXTURE_DIR / "openapi_baseline.yaml"),
+                str(FIXTURE_DIR / "openapi_breaking_current.yaml"),
+                "--format",
+                "json",
+            ],
+        )
+        assert result.exit_code == 1
+        assert '"openapi_path_removed"' in result.stdout
+
+    def test_openapi_diff_markdown(self) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "openapi",
+                "diff",
+                str(FIXTURE_DIR / "openapi_baseline.yaml"),
+                str(FIXTURE_DIR / "openapi_breaking_current.yaml"),
+                "--format",
+                "markdown",
+            ],
+        )
+        assert result.exit_code == 1
+        assert "# Schema Drift Report" in result.stdout
+        assert "BREAKING" in result.stdout
+
+    def test_openapi_diff_output_to_file(self, tmp_path: Path) -> None:
+        output = tmp_path / "report.md"
+        result = runner.invoke(
+            app,
+            [
+                "openapi",
+                "diff",
+                str(FIXTURE_DIR / "openapi_baseline.yaml"),
+                str(FIXTURE_DIR / "openapi_breaking_current.yaml"),
+                "--format",
+                "markdown",
+                "--output",
+                str(output),
+            ],
+        )
+        assert result.exit_code == 1
+        assert output.exists()
+        content = output.read_text(encoding="utf-8")
+        assert "BREAKING" in content
+
+    def test_openapi_diff_only_breaking(self) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "openapi",
+                "diff",
+                str(FIXTURE_DIR / "openapi_baseline.yaml"),
+                str(FIXTURE_DIR / "openapi_breaking_current.yaml"),
+                "--only-breaking",
+            ],
+        )
+        assert result.exit_code == 1
+        assert "BREAKING" in result.stdout
+
+    def test_openapi_diff_missing_baseline(self) -> None:
+        result = runner.invoke(app, ["openapi", "diff", "/nonexistent.yaml", "whatever.yaml"])
+        assert result.exit_code == 1
+        assert "not found" in result.stdout.lower()
+
+    def test_openapi_diff_identical_specs(self) -> None:
+        spec = str(FIXTURE_DIR / "openapi_baseline.yaml")
+        result = runner.invoke(app, ["openapi", "diff", spec, spec])
+        assert result.exit_code == 0
+        assert "safe" in result.stdout.lower() or "No breaking" in result.stdout
