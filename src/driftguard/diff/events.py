@@ -29,6 +29,17 @@ class ChangeCategory(str, Enum):
     INDEX_CHANGED = "index_changed"
     FOREIGN_KEY_CHANGED = "foreign_key_changed"
     PRIMARY_KEY_CHANGED = "primary_key_changed"
+    # OpenAPI deep diff categories
+    OPENAPI_PATH_REMOVED = "openapi_path_removed"
+    OPENAPI_PATH_ADDED = "openapi_path_added"
+    OPENAPI_METHOD_REMOVED = "openapi_method_removed"
+    OPENAPI_METHOD_ADDED = "openapi_method_added"
+    OPENAPI_RESPONSE_STATUS_REMOVED = "openapi_response_status_removed"
+    OPENAPI_RESPONSE_STATUS_ADDED = "openapi_response_status_added"
+    OPENAPI_PARAMETER_REMOVED = "openapi_parameter_removed"
+    OPENAPI_PARAMETER_ADDED = "openapi_parameter_added"
+    OPENAPI_PARAMETER_CHANGED = "openapi_parameter_changed"
+    OPENAPI_ENDPOINT_DEPRECATED = "openapi_endpoint_deprecated"
 
 
 class DiffEvent(BaseModel):
@@ -178,3 +189,94 @@ class DiffResult(BaseModel):
 
     def events_for_resource(self, resource_name: str) -> list[DiffEvent]:
         return [e for e in self.events if e.resource_name == resource_name]
+
+
+# --- OpenAPI Deep Diff Events ---
+
+
+class OpenApiPathRemoved(DiffEvent):
+    """An API path was removed."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_PATH_REMOVED
+    path: str
+
+
+class OpenApiPathAdded(DiffEvent):
+    """A new API path was added."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_PATH_ADDED
+    path: str
+
+
+class OpenApiMethodRemoved(DiffEvent):
+    """An HTTP method was removed from a path."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_METHOD_REMOVED
+    path: str
+    method: str
+
+
+class OpenApiMethodAdded(DiffEvent):
+    """A new HTTP method was added to a path."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_METHOD_ADDED
+    path: str
+    method: str
+
+
+class OpenApiResponseStatusRemoved(DiffEvent):
+    """A response status code was removed from an operation."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_RESPONSE_STATUS_REMOVED
+    path: str
+    method: str
+    status_code: str
+
+
+class OpenApiResponseStatusAdded(DiffEvent):
+    """A new response status code was added to an operation."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_RESPONSE_STATUS_ADDED
+    path: str
+    method: str
+    status_code: str
+
+
+class OpenApiParameterRemoved(DiffEvent):
+    """A parameter was removed from an operation."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_PARAMETER_REMOVED
+    path: str
+    method: str
+    param_name: str
+    location: str
+
+
+class OpenApiParameterAdded(DiffEvent):
+    """A new parameter was added to an operation."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_PARAMETER_ADDED
+    path: str
+    method: str
+    param_name: str
+    location: str
+    required: bool = False
+
+
+class OpenApiParameterChanged(DiffEvent):
+    """A parameter's type or required status changed."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_PARAMETER_CHANGED
+    path: str
+    method: str
+    param_name: str
+    location: str
+    change_detail: str
+
+
+class OpenApiEndpointDeprecated(DiffEvent):
+    """An endpoint was marked as deprecated."""
+
+    category: ChangeCategory = ChangeCategory.OPENAPI_ENDPOINT_DEPRECATED
+    path: str
+    method: str

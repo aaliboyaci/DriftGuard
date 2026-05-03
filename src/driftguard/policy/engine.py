@@ -13,6 +13,8 @@ from driftguard.diff.events import (
     EnumValuesChanged,
     FieldAdded,
     NullableChanged,
+    OpenApiParameterAdded,
+    OpenApiParameterChanged,
     RequiredChanged,
     TypeChanged,
 )
@@ -116,6 +118,59 @@ def _evaluate_event_default(event: DiffEvent) -> PolicyDecision:
                 event=event,
                 severity=Severity.INFO,
                 reason="Index changed; may affect query performance but not correctness",
+            )
+        # --- OpenAPI deep diff rules ---
+        case ChangeCategory.OPENAPI_PATH_REMOVED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.BREAKING,
+                reason="API path removed; all consumers of this endpoint will fail",
+            )
+        case ChangeCategory.OPENAPI_PATH_ADDED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.INFO,
+                reason="New API path added; backward compatible",
+            )
+        case ChangeCategory.OPENAPI_METHOD_REMOVED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.BREAKING,
+                reason="HTTP method removed; clients using this method will get 405",
+            )
+        case ChangeCategory.OPENAPI_METHOD_ADDED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.INFO,
+                reason="New HTTP method added; backward compatible",
+            )
+        case ChangeCategory.OPENAPI_RESPONSE_STATUS_REMOVED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.BREAKING,
+                reason="Response status code removed; clients handling this status will break",
+            )
+        case ChangeCategory.OPENAPI_RESPONSE_STATUS_ADDED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.INFO,
+                reason="New response status code added; existing clients unaffected",
+            )
+        case ChangeCategory.OPENAPI_PARAMETER_REMOVED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.WARNING,
+                reason="Parameter removed; clients sending this parameter may see unexpected behavior",
+            )
+        case ChangeCategory.OPENAPI_PARAMETER_ADDED:
+            return _evaluate_parameter_added(event)
+        case ChangeCategory.OPENAPI_PARAMETER_CHANGED:
+            return _evaluate_parameter_changed(event)
+        case ChangeCategory.OPENAPI_ENDPOINT_DEPRECATED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.WARNING,
+                reason="Endpoint marked as deprecated; plan migration before removal",
             )
         case _:
             return PolicyDecision(
@@ -253,4 +308,34 @@ def _evaluate_enum_changed(event: DiffEvent) -> PolicyDecision:
         event=event,
         severity=Severity.WARNING,
         reason=f"Enum values added: {', '.join(event.added_values)}; strict consumers may not handle new values",
+    )
+
+
+def _evaluate_parameter_added(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, OpenApiParameterAdded)
+    if event.required:
+        return PolicyDecision(
+            event=event,
+            severity=Severity.BREAKING,
+            reason=f"Required {event.location} parameter '{event.param_name}' added; existing clients will fail",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.INFO,
+        reason=f"Optional {event.location} parameter '{event.param_name}' added; backward compatible",
+    )
+
+
+def _evaluate_parameter_changed(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, OpenApiParameterChanged)
+    if "required: False -> True" in event.change_detail:
+        return PolicyDecision(
+            event=event,
+            severity=Severity.BREAKING,
+            reason=f"Parameter '{event.param_name}' became required; existing clients will fail",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.WARNING,
+        reason=f"Parameter '{event.param_name}' changed ({event.change_detail})",
     )

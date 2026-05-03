@@ -1,0 +1,115 @@
+openapi: "3.0.3"
+info:
+  title: Pet Store API
+  version: "2.0.0"
+paths:
+  # /pets path stays but changes
+  /pets:
+    get:
+      operationId: listPets
+      summary: List all pets
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: true           # BREAKING: was optional, now required
+          schema:
+            type: string
+            enum: [available, pending, sold]
+        - name: X-Api-Key
+          in: header
+          required: true           # BREAKING: new required header
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+        # "400" removed                  # BREAKING: status removed
+    post:
+      operationId: createPet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetCreate"
+      responses:
+        "201":
+          description: Pet created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+  /pets/{petId}:
+    parameters:
+      - name: petId
+        in: path
+        required: true
+        schema:
+          type: string             # Changed: was integer
+    get:
+      operationId: getPet
+      deprecated: true             # WARNING: deprecated
+      responses:
+        "200":
+          description: A single pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "404":
+          description: Pet not found
+    # delete removed                     # BREAKING: method removed
+  # /owners removed                      # BREAKING: path removed
+  /health:                               # INFO: new path
+    get:
+      operationId: healthCheck
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Pet:
+      type: object
+      required: [id, name, status]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        status:
+          type: string
+          enum: [available, pending, sold]
+        # tag removed                     # Response field removed: BREAKING
+    PetCreate:
+      type: object
+      required: [name, category]          # category added as required: BREAKING
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          default: available
+        category:
+          type: string
+        # tag removed from request: INFO (relaxes contract)
+    Owner:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        phone:
+          type: string

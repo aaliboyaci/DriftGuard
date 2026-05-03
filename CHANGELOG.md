@@ -13,8 +13,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - $ref resolution for request/response schemas
 - Path-level parameter inheritance with operation-level override
 - Swagger 2.x backward compatibility (body params, response schema)
-- 46 OpenAPI extractor tests (280 total)
+- 46 OpenAPI extractor tests
 - Rich test fixture: `tests/fixtures/petstore_full.yaml`
+- **OpenAPI diff events:** PathRemoved, PathAdded, MethodRemoved, MethodAdded, ResponseStatusRemoved, ResponseStatusAdded, ParameterRemoved, ParameterAdded, ParameterChanged, EndpointDeprecated
+- **OpenAPI diff engine:** path diff, method diff, parameter diff, request body field diff, response body field diff, status code diff, deprecated detection — reuses existing field diff for body comparison
+- **OpenAPI policy rules:** path/method/status removed = breaking, required param added = breaking, param became required = breaking, deprecated = warning, param removed = warning, path/method/status added = info
+- **Request/response field semantics:** required request field added = breaking, response field removed = breaking, optional response field added = info
+- 23 OpenAPI golden tests with baseline + breaking-current fixture pair
+- Tests: 280 → 303
 
 ## [0.2.5] - 2026-05-03
 
