@@ -5,6 +5,14 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — v0.4.0
+
+### Added
+- **Nested schema models:** `NestedContract`, `NestedResource`, `NestedField` with dot-path notation (`payload.items[].sku`), array/map/wildcard support
+- **Sampling statistics:** occurrence_count, sample_count, confidence, enum_candidates, format_hint
+- **PII safety:** examples_redacted flag (default true — only shape stored, never raw values)
+- 20 nested model tests (342 total)
+
 ## [0.3.2] - 2026-05-17
 
 ### Changed
