@@ -5,6 +5,19 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-05-17
+
+### Added
+- PostgreSQL JSONB sample collector with WHERE/LIMIT/null-skip/error handling
+- 16 Postgres JSONB collector tests (mocked SQLAlchemy)
+- 21 JSONB hardening edge-case tests: deep nesting, large arrays, heterogeneous arrays, sparse fields, map-like objects
+- `docs/jsonb-nested-diff.md` — full nested diff guide
+- `docs/jsonb-security.md` — PII safety, read-only user, redaction, sampling security
+- `docs/troubleshooting.md` — nested/JSONB section with common issues
+
+### Changed
+- Tests: 408 → 445
+
 ## [0.4.0] - 2026-05-17
 
 ### Added
