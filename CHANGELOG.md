@@ -5,6 +5,17 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-05-17
+
+### Added
+- **Sequelize collector:** regex-based JS/TS model parsing, type mapping, constraints, enums, associations
+- **Prisma collector:** schema.prisma parser with model/field/relation/enum extraction
+- **ORM SourceTypes:** `sequelize`, `prisma` added to SourceType enum
+- **Suppression system:** `.driftguardignore` YAML with glob-based resource/path/category matching, severity demotion, expiry dates
+- **Waiver system:** YAML-backed waiver CRUD with create/list/validate/expire
+- ORM test fixtures (Sequelize JS + Prisma schema)
+- 80 new tests (525 total)
+
 ## [0.4.2] - 2026-05-17
 
 ### Added
