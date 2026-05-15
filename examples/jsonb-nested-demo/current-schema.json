@@ -1,0 +1,205 @@
+{
+  "name": "work_orders",
+  "resources": [
+    {
+      "name": "work_orders",
+      "source": "examples\\jsonb-nested-demo\\current-samples.json",
+      "fields": [
+        {
+          "path": "assignee",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "operator-3",
+            "operator-7"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "machine",
+          "field_type": "object",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": null,
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "machine.id",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "MCH-101",
+            "MCH-103"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "machine.status",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "maintenance",
+            "running"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "metadata",
+          "field_type": "object",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": null,
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "metadata.createdBy",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "operator",
+            "system"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "metadata.priority",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "high",
+            "normal"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "metadata.version",
+          "field_type": "integer",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": null,
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "steps",
+          "field_type": "array",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": null,
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "steps[].mandatory",
+          "field_type": "boolean",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": null,
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "steps[].operationId",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "OP-CUT",
+            "OP-INSPECT",
+            "OP-WELD"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "steps[].sequence",
+          "field_type": "integer",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": null,
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        },
+        {
+          "path": "workOrderId",
+          "field_type": "string",
+          "nullable": false,
+          "required": true,
+          "occurrence_count": 2,
+          "sample_count": 2,
+          "confidence": 1.0,
+          "enum_candidates": [
+            "WO-2024-004",
+            "WO-2024-005"
+          ],
+          "format_hint": null,
+          "examples_redacted": true,
+          "metadata": {}
+        }
+      ],
+      "sample_count": 2,
+      "max_depth": 2
+    }
+  ],
+  "metadata": {}
+}

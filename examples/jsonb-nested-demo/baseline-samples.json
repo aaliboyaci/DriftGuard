@@ -1,0 +1,50 @@
+[
+  {
+    "workOrderId": "WO-2024-001",
+    "machine": {
+      "id": "MCH-101",
+      "status": "running",
+      "location": "line-3"
+    },
+    "steps": [
+      {"operationId": "OP-CUT", "sequence": 1, "required": true, "timeout": 300},
+      {"operationId": "OP-WELD", "sequence": 2, "required": true, "timeout": 600}
+    ],
+    "metadata": {
+      "createdBy": "system",
+      "priority": "high"
+    }
+  },
+  {
+    "workOrderId": "WO-2024-002",
+    "machine": {
+      "id": "MCH-102",
+      "status": "idle",
+      "location": "line-1"
+    },
+    "steps": [
+      {"operationId": "OP-DRILL", "sequence": 1, "required": true, "timeout": 120}
+    ],
+    "metadata": {
+      "createdBy": "operator",
+      "priority": "normal"
+    }
+  },
+  {
+    "workOrderId": "WO-2024-003",
+    "machine": {
+      "id": "MCH-101",
+      "status": "running",
+      "location": "line-3"
+    },
+    "steps": [
+      {"operationId": "OP-CUT", "sequence": 1, "required": true, "timeout": 300},
+      {"operationId": "OP-PAINT", "sequence": 2, "required": false, "timeout": 900}
+    ],
+    "metadata": {
+      "createdBy": "system",
+      "priority": "low",
+      "notes": "batch job"
+    }
+  }
+]

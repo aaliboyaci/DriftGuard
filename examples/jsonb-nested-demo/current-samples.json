@@ -1,0 +1,35 @@
+[
+  {
+    "workOrderId": "WO-2024-004",
+    "machine": {
+      "id": "MCH-101",
+      "status": "running"
+    },
+    "steps": [
+      {"operationId": "OP-CUT", "sequence": 1, "mandatory": true},
+      {"operationId": "OP-WELD", "sequence": 2, "mandatory": true}
+    ],
+    "assignee": "operator-7",
+    "metadata": {
+      "createdBy": "system",
+      "priority": "high",
+      "version": 2
+    }
+  },
+  {
+    "workOrderId": "WO-2024-005",
+    "machine": {
+      "id": "MCH-103",
+      "status": "maintenance"
+    },
+    "steps": [
+      {"operationId": "OP-INSPECT", "sequence": 1, "mandatory": false}
+    ],
+    "assignee": "operator-3",
+    "metadata": {
+      "createdBy": "operator",
+      "priority": "normal",
+      "version": 2
+    }
+  }
+]
