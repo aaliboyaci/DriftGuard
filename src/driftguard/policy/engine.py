@@ -12,6 +12,11 @@ from driftguard.diff.events import (
     DiffResult,
     EnumValuesChanged,
     FieldAdded,
+    NestedEnumValuesChanged,
+    NestedFieldAdded,
+    NestedFieldRemoved,
+    NestedFieldRequiredChanged,
+    NestedFieldTypeChanged,
     NullableChanged,
     OpenApiParameterAdded,
     OpenApiParameterChanged,
@@ -172,6 +177,23 @@ def _evaluate_event_default(event: DiffEvent) -> PolicyDecision:
                 severity=Severity.WARNING,
                 reason="Endpoint marked as deprecated; plan migration before removal",
             )
+        # --- Nested / JSONB diff rules ---
+        case ChangeCategory.NESTED_FIELD_REMOVED:
+            return _evaluate_nested_field_removed(event)
+        case ChangeCategory.NESTED_FIELD_ADDED:
+            return _evaluate_nested_field_added(event)
+        case ChangeCategory.NESTED_FIELD_TYPE_CHANGED:
+            return _evaluate_nested_type_changed(event)
+        case ChangeCategory.NESTED_FIELD_REQUIRED_CHANGED:
+            return _evaluate_nested_required_changed(event)
+        case ChangeCategory.NESTED_FIELD_NULLABLE_CHANGED:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.WARNING,
+                reason="Nested field nullable status changed; consumers without null handling may fail",
+            )
+        case ChangeCategory.NESTED_ENUM_VALUES_CHANGED:
+            return _evaluate_nested_enum_changed(event)
         case _:
             return PolicyDecision(
                 event=event,
@@ -338,4 +360,89 @@ def _evaluate_parameter_changed(event: DiffEvent) -> PolicyDecision:
         event=event,
         severity=Severity.WARNING,
         reason=f"Parameter '{event.param_name}' changed ({event.change_detail})",
+    )
+
+
+# --- Nested / JSONB policy helpers ---
+
+
+def _evaluate_nested_field_removed(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, NestedFieldRemoved)
+    if event.confidence >= 0.8:
+        return PolicyDecision(
+            event=event,
+            severity=Severity.BREAKING,
+            reason=f"Nested field '{event.path}' removed with high confidence ({event.confidence}); consumers will break",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.WARNING,
+        reason=f"Nested field '{event.path}' removed with low confidence ({event.confidence}); may be intermittent",
+    )
+
+
+def _evaluate_nested_field_added(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, NestedFieldAdded)
+    if event.required:
+        if event.confidence >= 0.8:
+            return PolicyDecision(
+                event=event,
+                severity=Severity.BREAKING,
+                reason=f"Required nested field '{event.path}' added with high confidence; existing producers may not provide it",
+            )
+        return PolicyDecision(
+            event=event,
+            severity=Severity.WARNING,
+            reason=f"Required nested field '{event.path}' added with low confidence ({event.confidence}); may be intermittent",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.INFO,
+        reason=f"Optional nested field '{event.path}' added; backward compatible",
+    )
+
+
+def _evaluate_nested_type_changed(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, NestedFieldTypeChanged)
+    pair = (event.old_type, event.new_type)
+    if pair in WIDENING_TRANSITIONS:
+        return PolicyDecision(
+            event=event,
+            severity=Severity.WARNING,
+            reason=f"Nested field '{event.path}' type widened from {event.old_type} to {event.new_type}",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.BREAKING,
+        reason=f"Nested field '{event.path}' type changed from {event.old_type} to {event.new_type}; consumers will break",
+    )
+
+
+def _evaluate_nested_required_changed(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, NestedFieldRequiredChanged)
+    if event.old_required and not event.new_required:
+        return PolicyDecision(
+            event=event,
+            severity=Severity.INFO,
+            reason=f"Nested field '{event.path}' became optional; backward compatible",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.BREAKING,
+        reason=f"Nested field '{event.path}' became required; existing data without this field will fail validation",
+    )
+
+
+def _evaluate_nested_enum_changed(event: DiffEvent) -> PolicyDecision:
+    assert isinstance(event, NestedEnumValuesChanged)
+    if event.removed_values:
+        return PolicyDecision(
+            event=event,
+            severity=Severity.BREAKING,
+            reason=f"Nested enum values removed from '{event.path}': {', '.join(event.removed_values)}; existing data may be invalid",
+        )
+    return PolicyDecision(
+        event=event,
+        severity=Severity.WARNING,
+        reason=f"Nested enum values added to '{event.path}': {', '.join(event.added_values)}; strict consumers may not handle new values",
     )
