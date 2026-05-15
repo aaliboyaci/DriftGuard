@@ -552,5 +552,9 @@ def _generate_report(format: str, diff_result: DiffResult, policy_result: Policy
             return MarkdownReporter().render(diff_result, policy_result)
         case "html":
             return HtmlReporter().render(diff_result, policy_result)
+        case "pr" | "pr-comment":
+            from driftguard.reporters.pr_comment import PrCommentReporter
+
+            return PrCommentReporter().render(diff_result, policy_result)
         case _:
             return MarkdownReporter().render(diff_result, policy_result)
