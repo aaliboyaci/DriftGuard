@@ -5,6 +5,16 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-05-17
+
+### Changed
+- README slimmed: Supported Sources section condensed, links to docs for details
+- ROADMAP updated to reflect v0.3.x completion
+- GitHub repo description updated
+- `docs/troubleshooting.md` with debug tips, known limitations, common issues
+- All docs links verified
+- CI green on Python 3.11/3.12/3.13
+
 ## [0.3.1] - 2026-05-17
 
 ### Added
