@@ -13,7 +13,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **PII safety:** examples_redacted flag (default true — only shape stored, never raw values)
 - 20 nested model tests
 - **JSON shape inference engine:** multi-sample merge, per-sample occurrence tracking, confidence scoring, enum candidate detection with configurable threshold, format hints (uuid/email/date/datetime), max_depth/max_samples limits, integer+number merge, mixed type detection, boolean-vs-int correctness
-- 28 inference engine tests (370 total)
+- 28 inference engine tests
+- **JSON sample collector:** single JSON, JSON array, NDJSON, multi-file, file size limit, error handling
+- 18 collector tests
+- **Nested diff events:** NestedFieldAdded, NestedFieldRemoved, NestedFieldTypeChanged, NestedFieldRequiredChanged, NestedFieldNullableChanged, NestedEnumValuesChanged
+- **Nested diff engine:** path add/remove/type/required/nullable/enum detection with confidence pass-through
+- **Nested policy rules:** high-confidence removed = breaking, low-confidence = warning, required added = breaking, optional added = info, enum removed = breaking
+- 20 nested diff tests (408 total)
 
 ## [0.3.2] - 2026-05-17
 

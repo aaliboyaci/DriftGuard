@@ -29,6 +29,13 @@ class ChangeCategory(str, Enum):
     INDEX_CHANGED = "index_changed"
     FOREIGN_KEY_CHANGED = "foreign_key_changed"
     PRIMARY_KEY_CHANGED = "primary_key_changed"
+    # Nested / JSONB diff categories
+    NESTED_FIELD_ADDED = "nested_field_added"
+    NESTED_FIELD_REMOVED = "nested_field_removed"
+    NESTED_FIELD_TYPE_CHANGED = "nested_field_type_changed"
+    NESTED_FIELD_REQUIRED_CHANGED = "nested_field_required_changed"
+    NESTED_FIELD_NULLABLE_CHANGED = "nested_field_nullable_changed"
+    NESTED_ENUM_VALUES_CHANGED = "nested_enum_values_changed"
     # OpenAPI deep diff categories
     OPENAPI_PATH_REMOVED = "openapi_path_removed"
     OPENAPI_PATH_ADDED = "openapi_path_added"
@@ -280,3 +287,65 @@ class OpenApiEndpointDeprecated(DiffEvent):
     category: ChangeCategory = ChangeCategory.OPENAPI_ENDPOINT_DEPRECATED
     path: str
     method: str
+
+
+# --- Nested / JSONB Diff Events ---
+
+
+class NestedFieldAdded(DiffEvent):
+    """A new nested field path was added."""
+
+    category: ChangeCategory = ChangeCategory.NESTED_FIELD_ADDED
+    path: str
+    field_type: str
+    required: bool = False
+    confidence: float = 1.0
+
+
+class NestedFieldRemoved(DiffEvent):
+    """A nested field path was removed."""
+
+    category: ChangeCategory = ChangeCategory.NESTED_FIELD_REMOVED
+    path: str
+    field_type: str
+    confidence: float = 1.0
+
+
+class NestedFieldTypeChanged(DiffEvent):
+    """A nested field's data type was changed."""
+
+    category: ChangeCategory = ChangeCategory.NESTED_FIELD_TYPE_CHANGED
+    path: str
+    old_type: str
+    new_type: str
+    confidence: float = 1.0
+
+
+class NestedFieldRequiredChanged(DiffEvent):
+    """A nested field's required property was changed."""
+
+    category: ChangeCategory = ChangeCategory.NESTED_FIELD_REQUIRED_CHANGED
+    path: str
+    old_required: bool
+    new_required: bool
+    confidence: float = 1.0
+
+
+class NestedFieldNullableChanged(DiffEvent):
+    """A nested field's nullable property was changed."""
+
+    category: ChangeCategory = ChangeCategory.NESTED_FIELD_NULLABLE_CHANGED
+    path: str
+    old_nullable: bool
+    new_nullable: bool
+    confidence: float = 1.0
+
+
+class NestedEnumValuesChanged(DiffEvent):
+    """A nested field's enum candidate values were changed."""
+
+    category: ChangeCategory = ChangeCategory.NESTED_ENUM_VALUES_CHANGED
+    path: str
+    added_values: list[str] = Field(default_factory=list)
+    removed_values: list[str] = Field(default_factory=list)
+    confidence: float = 1.0
