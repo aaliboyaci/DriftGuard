@@ -174,17 +174,11 @@ It is a **contract drift detector**: snapshot, compare, classify, gate.
 
 ## Supported Sources
 
-| Source | Status | Notes |
-|---|---|---|
-| PostgreSQL | **Stable** | SQLAlchemy introspection with PK/FK/unique constraints |
-| OpenAPI 3.x / Swagger 2.x | **Stable** | Component schema extraction |
-| JSON Schema | **Stable** | File-based type/nullable/enum/default parsing |
-| CSV | **Stable** | Header + sample-based type inference |
-| SQLite | **Stable** | SQLAlchemy introspection, fully tested |
-| MySQL | **Stable** | SQLAlchemy introspection (requires mysqlclient/pymysql) |
-| YAML | **Beta** | Data file structure inference |
-| MongoDB | Planned | Sample-based schema inference |
-| Kafka / Avro / Protobuf | Planned | Schema Registry integration |
+**Stable:** PostgreSQL, MySQL, SQLite, OpenAPI 3.x/Swagger 2.x, JSON Schema, CSV  
+**Beta:** YAML  
+**Planned:** MongoDB, Kafka/Avro/Protobuf  
+
+See [docs/supported-sources.md](docs/supported-sources.md) for full details.
 
 ## Risk Classification
 
@@ -292,6 +286,7 @@ mypy src/                     # type check
 - [Architecture](docs/architecture.md) — System design and module responsibilities
 - [Writing Adapters](docs/adapters.md) — Guide to adding new source collectors
 - [FAQ](docs/faq.md) — Common questions answered
+- [Troubleshooting](docs/troubleshooting.md) — Debug tips and known limitations
 - [CHANGELOG](CHANGELOG.md) — Release history
 - [ROADMAP](ROADMAP.md) — Planned features
 
