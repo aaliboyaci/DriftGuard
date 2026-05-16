@@ -108,6 +108,31 @@ Detects path/method removals, parameter changes, request/response body field cha
 driftguard openapi diff baseline.yaml current.yaml --format json
 driftguard openapi diff baseline.yaml current.yaml --only-breaking
 driftguard openapi diff baseline.yaml current.yaml -f html -o report.html
+driftguard openapi diff baseline.yaml current.yaml -f pr -o comment.md   # GitHub PR comment
+```
+
+### PR Comment Output
+
+The `pr` format generates compact Markdown for GitHub PR comments with collapsible sections:
+
+```markdown
+## DriftGuard Schema Drift Report
+
+> **3 breaking change(s) detected** — CI would fail
+
+**Pet Store API 1.0.0** → **Pet Store API 2.0.0** | 5 changes: 3 breaking, 1 warning, 1 info
+
+### Breaking Changes
+
+| Resource | Change | Reason |
+|----------|--------|--------|
+| /owners | Path removed: /owners | API path removed; all consumers will fail |
+| GET /pets | Parameter added: X-Api-Key (required) | Required header; existing clients will fail |
+| DELETE /pets/{petId} | Method removed | HTTP method removed; clients get 405 |
+
+<details><summary>Warnings (1)</summary>
+...
+</details>
 ```
 
 ## Installation
@@ -261,6 +286,7 @@ mypy src/                     # type check
 - [Quick Start](docs/quickstart.md) — Get running in 5 minutes
 - [CLI Usage](docs/cli-usage.md) — Detailed command reference
 - [CI Gate](docs/ci-gate.md) — CI/CD integration (GitHub Actions, GitLab CI)
+- [GitHub Actions](docs/github-actions.md) — PR comments, step summary, annotations, SARIF
 - [Policy Rules](docs/policy-rules.md) — Risk classification rules and overrides
 - [Supported Sources](docs/supported-sources.md) — All collectors and config examples
 - [Architecture](docs/architecture.md) — System design and module responsibilities

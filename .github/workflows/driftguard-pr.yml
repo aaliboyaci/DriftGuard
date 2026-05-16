@@ -1,0 +1,56 @@
+name: DriftGuard PR Check
+
+on:
+  pull_request:
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.json"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  openapi-drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install DriftGuard
+        run: pip install driftguard-contracts
+
+      # Download baseline from main branch
+      - name: Get baseline spec from main
+        run: git show origin/main:openapi.yaml > /tmp/baseline.yaml 2>/dev/null || echo "No baseline found"
+
+      - name: Run OpenAPI diff
+        id: drift
+        run: |
+          if [ -f /tmp/baseline.yaml ] && [ -f openapi.yaml ]; then
+            driftguard openapi diff /tmp/baseline.yaml openapi.yaml \
+              --format markdown --output drift-report.md || true
+            echo "has_report=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_report=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post PR comment
+        if: steps.drift.outputs.has_report == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: drift-report.md
+
+      - name: Write GitHub Actions summary
+        if: steps.drift.outputs.has_report == 'true'
+        run: cat drift-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on breaking changes
+        if: steps.drift.outputs.has_report == 'true'
+        run: |
+          driftguard openapi diff /tmp/baseline.yaml openapi.yaml \
+            --format json > /dev/null

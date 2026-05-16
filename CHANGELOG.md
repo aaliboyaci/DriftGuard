@@ -5,6 +5,15 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-05-17
+
+### Added
+- **PR comment reporter** (`--format pr`): compact Markdown with breaking summary, collapsible warning/info sections, max-length truncation
+- `.github/workflows/driftguard-pr.yml` — PR comment workflow example with sticky comment, step summary, baseline from main
+- `docs/github-actions.md` — PR comments, step summary, annotations, SARIF integration, artifact strategies
+- 12 PR comment reporter tests (322 total)
+- README: PR comment output sample, GitHub Actions docs link
+
 ## [0.3.0] - 2026-05-03
 
 ### Added
