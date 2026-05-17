@@ -31,9 +31,11 @@ app = typer.Typer(
 config_app = typer.Typer(name="config", help="Configuration management commands", no_args_is_help=True)
 snapshots_app = typer.Typer(name="snapshots", help="Snapshot management commands", no_args_is_help=True)
 openapi_app = typer.Typer(name="openapi", help="OpenAPI deep diff commands", no_args_is_help=True)
+nested_app = typer.Typer(name="nested", help="JSONB/nested contract commands", no_args_is_help=True)
 app.add_typer(config_app)
 app.add_typer(snapshots_app)
 app.add_typer(openapi_app)
+app.add_typer(nested_app)
 console = Console()
 
 
@@ -471,6 +473,102 @@ def openapi_diff(
         raise typer.Exit(1)
 
     console.print("\n[green]No breaking changes. API contract is safe.[/green]")
+
+
+@nested_app.command("infer")
+def nested_infer(
+    files: list[str] = typer.Argument(help="JSON/NDJSON sample file(s)"),  # noqa: B008
+    name: str = typer.Option("payload", "--name", "-n", help="Resource name"),
+    output: str = typer.Option("", "--output", "-o", help="Output file (stdout if empty)"),
+    max_depth: int = typer.Option(10, "--max-depth", help="Maximum nesting depth"),
+    sample_limit: int = typer.Option(10000, "--sample-limit", help="Max samples to process"),
+) -> None:
+    """Infer nested schema shape from JSON/NDJSON samples."""
+    from driftguard.collectors.json_sample_collector import JsonSampleCollector
+    from driftguard.inference.json_shape import InferenceConfig
+
+    config = InferenceConfig(max_depth=max_depth, max_samples=sample_limit)
+    collector = JsonSampleCollector(paths=files, resource_name=name, config=config)
+
+    try:
+        resource = collector.collect()
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1) from None
+
+    from driftguard.schema.nested_models import NestedContract
+
+    contract = NestedContract(name=name, resources=[resource])
+    json_out = contract.model_dump_json(indent=2)
+
+    if output:
+        Path(output).write_text(json_out, encoding="utf-8")
+        console.print(
+            f"[green]Schema saved: {output} ({len(resource.fields)} fields, {resource.sample_count} samples)[/green]"
+        )
+    else:
+        console.print(json_out)
+
+
+@nested_app.command("diff")
+def nested_diff(
+    baseline: str = typer.Argument(..., help="Baseline nested schema JSON"),
+    current: str = typer.Argument(..., help="Current nested schema JSON"),
+    format: str = typer.Option("terminal", "--format", "-f", help="Output format: terminal, json, markdown, html, pr"),
+    output: str = typer.Option("", "--output", "-o", help="Output file path"),
+    only_breaking: bool = typer.Option(False, "--only-breaking", help="Show only breaking changes"),
+) -> None:
+    """Compare two nested contract schemas and show semantic differences."""
+    from driftguard.diff.nested_engine import compute_nested_diff
+    from driftguard.policy.models import Severity
+    from driftguard.schema.nested_models import NestedContract
+
+    baseline_path = Path(baseline)
+    current_path = Path(current)
+
+    if not baseline_path.exists():
+        console.print(f"[red]Baseline not found: {baseline}[/red]")
+        raise typer.Exit(1)
+    if not current_path.exists():
+        console.print(f"[red]Current not found: {current}[/red]")
+        raise typer.Exit(1)
+
+    b_contract = NestedContract.model_validate_json(baseline_path.read_text(encoding="utf-8"))
+    c_contract = NestedContract.model_validate_json(current_path.read_text(encoding="utf-8"))
+
+    diff_result = compute_nested_diff(b_contract, c_contract)
+    policy_result = evaluate(diff_result)
+
+    if only_breaking:
+        policy_result.decisions = [d for d in policy_result.decisions if d.severity == Severity.BREAKING]
+
+    if format == "terminal":
+        from driftguard.reporters.terminal import TerminalReporter
+
+        reporter = TerminalReporter(console)
+        reporter.report(diff_result, policy_result)
+    else:
+        report_content = _generate_report(format, diff_result, policy_result)
+        if output:
+            Path(output).write_text(report_content, encoding="utf-8")
+            console.print(f"[green]Report saved: {output}[/green]")
+        else:
+            console.print(report_content)
+
+    console.print(
+        f"\n[dim]Summary: {diff_result.event_count} changes | "
+        f"{policy_result.breaking_count} breaking | "
+        f"{policy_result.warning_count} warning | "
+        f"{policy_result.info_count} info[/dim]"
+    )
+
+    if policy_result.has_breaking:
+        console.print(
+            f"\n[red bold]BREAKING CHANGES DETECTED: {policy_result.breaking_count} breaking change(s)[/red bold]"
+        )
+        raise typer.Exit(1)
+
+    console.print("\n[green]No breaking changes. Nested contract is safe.[/green]")
 
 
 def _load_config(path: str) -> DriftGuardConfig:
