@@ -442,9 +442,7 @@ def snapshots_import(
     store = LocalStore(cfg.snapshot_dir)
     try:
         snap = store.import_snapshot(input_file)
-        console.print(
-            f"[green]Imported snapshot '{snap.name}' ({len(snap.resources)} resources)[/green]"
-        )
+        console.print(f"[green]Imported snapshot '{snap.name}' ({len(snap.resources)} resources)[/green]")
     except FileNotFoundError:
         console.print(f"[red]File not found: {input_file}[/red]")
         raise typer.Exit(1) from None

@@ -612,7 +612,17 @@ class TestSnapshotsExportCommand:
         config_path = tmp_path / "driftguard.yaml"
         save_config(config, config_path)
         result = runner.invoke(
-            app, ["snapshots", "export", "-n", "nonexistent", "-o", str(tmp_path / "out.json"), "--config", str(config_path)]
+            app,
+            [
+                "snapshots",
+                "export",
+                "-n",
+                "nonexistent",
+                "-o",
+                str(tmp_path / "out.json"),
+                "--config",
+                str(config_path),
+            ],
         )
         assert result.exit_code == 1
         assert "not found" in result.stdout.lower()
