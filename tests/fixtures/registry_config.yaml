@@ -1,0 +1,12 @@
+service:
+  service_name: inventory-api
+  service_version: "2.1.0"
+  role: producer
+  owner: platform-team
+
+dependencies:
+  - service_name: orders-api
+    contract_name: orders
+    required_fields:
+      - items[].sku
+      - items[].quantity

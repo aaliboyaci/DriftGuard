@@ -12,11 +12,12 @@ import json
 from pathlib import Path
 
 from driftguard.schema.models import ContractSnapshot
+from driftguard.store.backend import SnapshotBackend
 
 DEFAULT_STORE_DIR = ".driftguard/snapshots"
 
 
-class LocalStore:
+class LocalStore(SnapshotBackend):
     """Read/write snapshots as JSON files on the local filesystem."""
 
     def __init__(self, base_dir: str | Path = DEFAULT_STORE_DIR) -> None:
@@ -26,13 +27,13 @@ class LocalStore:
         safe_name = name.replace("/", "_").replace("\\", "_")
         return self.base_dir / f"{safe_name}.json"
 
-    def save(self, snapshot: ContractSnapshot) -> Path:
+    def save(self, snapshot: ContractSnapshot) -> str:
         """Save a snapshot to disk. Creates directories if needed."""
         self.base_dir.mkdir(parents=True, exist_ok=True)
         path = self._snapshot_path(snapshot.name)
         data = snapshot.model_dump_json(indent=2)
         path.write_text(data, encoding="utf-8")
-        return path
+        return str(path)
 
     def load(self, name: str) -> ContractSnapshot:
         """Load a snapshot by name. Raises FileNotFoundError if not found."""
