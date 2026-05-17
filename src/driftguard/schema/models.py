@@ -24,6 +24,8 @@ class SourceType(str, Enum):
     JSON_PAYLOAD = "json_payload"
     CSV = "csv"
     PARQUET = "parquet"
+    SEQUELIZE = "sequelize"
+    PRISMA = "prisma"
 
 
 class FieldConstraint(BaseModel):

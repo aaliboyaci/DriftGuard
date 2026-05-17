@@ -1,0 +1,24 @@
+suppressions:
+  - resource: "legacy_*"
+    category: "field_removed"
+    severity_override: "warning"
+    reason: "Legacy table being deprecated Q3"
+    owner: "platform-team"
+    expires_at: "2026-09-01"
+
+  - path: "metadata.*"
+    severity_override: "info"
+    reason: "Metadata fields are internal"
+    owner: "backend-team"
+
+  - resource: "temp_*"
+    severity_override: "ignore"
+    reason: "Temporary tables not tracked"
+    owner: "data-team"
+    expires_at: "2026-12-31"
+
+  - resource: "users"
+    category: "nullable_changed"
+    severity_override: "info"
+    reason: "Users table nullable changes are safe"
+    owner: "auth-team"
