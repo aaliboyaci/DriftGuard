@@ -5,6 +5,17 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-05-17
+
+### Added
+- **Snapshot backend interface:** abstract `SnapshotBackend` with `LocalStore` implementation
+- **S3 backend:** `S3Backend` with lazy boto3 import, `[s3]` optional dependency
+- **Snapshot registry:** branch-aware save/load with fallback discovery
+- **Cross-service contract registry:** publish/pull/list with semantic versioning
+- **Impact analysis:** detect impacted consumer services from producer changes
+- `ServiceMetadata`, `ServiceDependency`, `RegistryConfig` models
+- 43 new tests (568 total)
+
 ## [0.6.0] - 2026-05-17
 
 ### Added

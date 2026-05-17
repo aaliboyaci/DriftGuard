@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "driftguard-contracts"
-version = "0.6.0"
+version = "0.8.0"
 description = "Detect schema and data contract drift across databases, APIs, and files before it breaks production"
 readme = "README.md"
 license = "MIT"
@@ -51,6 +51,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+s3 = ["boto3>=1.28,<2"]
 dev = [
     "pytest>=8,<9",
     "pytest-cov>=5,<6",
