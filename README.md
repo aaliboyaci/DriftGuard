@@ -9,9 +9,15 @@ Catch breaking data contract changes before production.
 [![Tests](https://img.shields.io/badge/tests-576%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](#testing)
 
-DriftGuard is a Python CLI for detecting schema drift and breaking contract changes across APIs, databases, files, and event streams.
+DriftGuard snapshots your schemas, compares them semantically, classifies each change by risk, and fails CI when something breaks.
 
-**Use it in CI to block unsafe schema changes before they break downstream systems.**
+```
+1. Detect breaking contract changes
+2. Explain why they are risky
+3. Show them in CI / PR comments
+4. Allow controlled exceptions (suppression / waiver)
+5. Support APIs, databases, JSONB, files, and ORM models
+```
 
 ---
 
@@ -22,17 +28,16 @@ pip install driftguard-contracts
 driftguard demo
 ```
 
-This runs a self-contained demo — no config, no database, no files needed. You'll see a simulated API schema change with breaking changes detected.
+No config, no database needed. You'll see a simulated API schema change with breaking changes detected.
 
 ## How It Works
 
 ```
-1. Take a baseline snapshot    →  driftguard snapshot --name baseline
-2. Make schema changes         →  (alter table, update API spec, edit CSV...)
-3. Take current snapshot       →  driftguard snapshot --name current
-4. Compare                     →  driftguard diff -b baseline -c current
-5. CI gate                     →  driftguard check -b baseline -c current  # exit 1 on breaking
-6. Report                      →  driftguard report -b baseline -c current -f markdown
+driftguard snapshot --name baseline      # take baseline
+# ... make schema changes ...
+driftguard snapshot --name current       # take current
+driftguard check -b baseline -c current  # exit 1 on breaking
+driftguard report -b baseline -c current -f markdown
 ```
 
 ## Example Output
@@ -40,122 +45,48 @@ This runs a self-contained demo — no config, no database, no files needed. You
 ```
 $ driftguard demo
 
-DriftGuard Demo
-Simulating a Pet Store API schema change...
-
-1. Creating baseline snapshot (v1.0)...
-2. Creating current snapshot (v1.1) with schema changes...
-   - Pet.tag removed
-   - Pet.category added (required)
-   - Pet.status enum: +archived
-   - Owner.id type: integer -> string
-   - Owner.address added (optional)
-
-3. Running semantic diff...
-
 Schema Drift Report: baseline -> current
 Changes: 5 | Breaking: 2 | Warnings: 2 | Info: 1
 
-  Severity   | Resource   | Change                              | Reason
- ------------+------------+-------------------------------------+-------------------------------
-  INFO       | Owner      | Field added: Owner.address (string) | Adding an optional field is
-             |            |                                     | backward compatible
-  [!]        | Owner      | Type changed: Owner.id              | Type widened from integer to
-  WARNING    |            | (integer -> string)                 | string; some consumers may
-             |            |                                     | accept this
-  [X]        | Pet        | Field removed: Pet.tag (string)     | Consumers expecting this
-  BREAKING   |            |                                     | field will fail
-  [X]        | Pet        | Field added: Pet.category (string)  | Adding a required field may
-  BREAKING   |            |                                     | break existing producers
-  [!]        | Pet        | Enum values changed: Pet.status     | Enum values added: archived;
-  WARNING    |            |                                     | strict consumers may not
-             |            |                                     | handle new values
-
-Summary: 5 changes | 2 breaking | 2 warning | 1 info
+  BREAKING   Pet        Field removed: Pet.tag (string)
+  BREAKING   Pet        Field added: Pet.category (string, required)
+  WARNING    Owner      Type changed: Owner.id (integer -> string)
+  WARNING    Pet        Enum values changed: Pet.status (+archived)
+  INFO       Owner      Field added: Owner.address (string, optional)
 
 BREAKING CHANGES DETECTED: 2 breaking change(s)
 CI check would fail (exit code 1)
 ```
 
-**What the risks mean:**
-- **BREAKING** — `Pet.tag` removed and `Pet.category` added as required: downstream consumers will fail.
-- **WARNING** — `Owner.id` type widened (integer → string) and `Pet.status` enum expanded: some consumers may not handle these.
-- **INFO** — `Owner.address` added as optional: safe, backward compatible.
+## Key Capabilities
 
-## OpenAPI Deep Diff
-
-Compare two OpenAPI specs directly — no config, no snapshots needed:
+### OpenAPI Deep Diff
 
 ```bash
 driftguard openapi diff baseline.yaml current.yaml
+driftguard openapi diff baseline.yaml current.yaml -f pr -o comment.md
 ```
 
-Detects path/method removals, parameter changes, request/response body field changes, status code changes, and deprecated endpoints with correct request vs response semantics:
+Detects path/method removals, parameter changes, request/response body changes, status code changes, and deprecated endpoints. See [docs/cli-usage.md](docs/cli-usage.md).
 
-| Change | Risk | Why |
-|--------|------|-----|
-| Path removed | `breaking` | All consumers of this endpoint fail |
-| Method removed | `breaking` | Clients using this method get 405 |
-| Response status removed | `breaking` | Clients handling this status break |
-| Required param added | `breaking` | Existing clients don't send it |
-| Required request field added | `breaking` | Existing clients don't include it |
-| Response field removed | `breaking` | Consumers depending on this field fail |
-| Endpoint deprecated | `warning` | Plan migration before removal |
-| Optional param added | `info` | Backward compatible |
-| Response field added | `info` | Backward compatible |
-
-```bash
-driftguard openapi diff baseline.yaml current.yaml --format json
-driftguard openapi diff baseline.yaml current.yaml --only-breaking
-driftguard openapi diff baseline.yaml current.yaml -f html -o report.html
-driftguard openapi diff baseline.yaml current.yaml -f pr -o comment.md   # GitHub PR comment
-```
-
-### PR Comment Output
-
-The `pr` format generates compact Markdown for GitHub PR comments with collapsible sections:
-
-```markdown
-## DriftGuard Schema Drift Report
-
-> **3 breaking change(s) detected** — CI would fail
-
-**Pet Store API 1.0.0** → **Pet Store API 2.0.0** | 5 changes: 3 breaking, 1 warning, 1 info
-
-### Breaking Changes
-
-| Resource | Change | Reason |
-|----------|--------|--------|
-| /owners | Path removed: /owners | API path removed; all consumers will fail |
-| GET /pets | Parameter added: X-Api-Key (required) | Required header; existing clients will fail |
-| DELETE /pets/{petId} | Method removed | HTTP method removed; clients get 405 |
-
-<details><summary>Warnings (1)</summary>
-...
-</details>
-```
-
-## Nested / JSONB Contract Diff
-
-Infer shape from JSON samples and diff nested contracts:
+### JSONB / Nested Contract Diff
 
 ```bash
 driftguard nested infer samples.json --output baseline.json
-# ... payload changes ...
 driftguard nested infer new-samples.json --output current.json
 driftguard nested diff baseline.json current.json
 ```
 
-Catches nested field removals, type changes, required additions, and enum drift with confidence-aware severity:
+Confidence-aware severity: high confidence removals = breaking, low confidence = warning. No raw values stored. See [docs/jsonb-nested-diff.md](docs/jsonb-nested-diff.md).
 
-```
-BREAKING   work_orders.machine.location removed (confidence: 1.0)
-BREAKING   work_orders.steps[].timeout removed (confidence: 1.0)
-WARNING    work_orders.metadata.notes removed (confidence: 0.33)
-BREAKING   work_orders.assignee added (required, confidence: 1.0)
-```
+### Snapshot Management
 
-High confidence (>=0.8) removals = breaking. Low confidence = warning. No raw values stored — only shape.
+```bash
+driftguard snapshots list
+driftguard snapshots export -n v1 -o backup.json.gz --compress
+driftguard snapshots import backup.json.gz
+driftguard snapshots cleanup --keep 5
+```
 
 ## Installation
 
@@ -165,104 +96,47 @@ uv pip install driftguard-contracts     # uv
 poetry add driftguard-contracts         # poetry
 ```
 
-## Quick Start
-
-```bash
-# Initialize config
-driftguard init
-
-# Take baseline snapshot
-driftguard snapshot --name baseline
-
-# ... make schema changes ...
-
-# Compare and gate
-driftguard snapshot --name current
-driftguard check --baseline baseline --current current
-```
-
-## Why DriftGuard?
-
-Most schema tools focus on **one layer**: a migration linter checks SQL, an API linter checks OpenAPI specs. But real drift happens **across layers** — a Postgres column rename breaks a downstream CSV export, an API field removal crashes a partner's mobile app.
-
-DriftGuard takes **snapshots** of your contracts at different points in time and **compares them semantically**. It understands that renaming a field is a breaking change, that widening `integer` to `number` is a warning, and that adding an optional field is safe.
-
-**DriftGuard is not:**
-- A **linter** — it doesn't check style or best practices on a single schema
-- A **migration tool** — it doesn't generate ALTER TABLE or manage state
-- A **runtime monitor** — it runs at build time, in CI, or on demand
-
-It is a **contract drift detector**: snapshot, compare, classify, gate.
-
 ## Supported Sources
 
-**Stable:** PostgreSQL, MySQL, SQLite, OpenAPI 3.x/Swagger 2.x, JSON Schema, CSV, JSONB nested diff  
-**Beta:** YAML, Sequelize, Prisma, S3 backend, Suppression/Waiver  
-**Experimental:** Cross-service registry  
-**Planned:** Parquet, MongoDB, Kafka/Avro/Protobuf  
+**Stable:** PostgreSQL, MySQL, SQLite, OpenAPI 3.x/Swagger 2.x, JSON Schema, CSV, JSONB nested diff
+**Beta:** YAML, Sequelize, Prisma, S3 backend, Suppression/Waiver
+**Experimental:** Cross-service registry
+**Planned:** Parquet, MongoDB, Kafka/Avro/Protobuf
 
-See [docs/supported-sources.md](docs/supported-sources.md) for full details.
+See [docs/supported-sources.md](docs/supported-sources.md) for stability matrix.
 
 ## Risk Classification
 
-| Change | Risk | Reason |
-|---|---|---|
-| Field removed | `breaking` | Consumers expecting this field will fail |
-| Required field added | `breaking` | Validation may break existing producers |
-| Column renamed | `breaking` | Effectively a remove + add |
-| Type string -> integer | `breaking` | Parse behavior changes |
-| FK/PK changed | `breaking` | Referential integrity affected |
-| Type integer -> number | `warning` | Widening; may be acceptable |
-| Nullable false -> true | `warning` | Null handling required |
-| Enum value added | `warning` | Strict consumers may break |
-| Constraint changed | `warning` | Validation behavior changes |
-| Optional field added | `info` | Backward compatible |
-| Default value changed | `info` | New records only |
+| Change | Risk |
+|---|---|
+| Field removed / renamed | `breaking` |
+| Required field added | `breaking` |
+| Type narrowing (string -> integer) | `breaking` |
+| Type widening (integer -> number) | `warning` |
+| Enum value added | `warning` |
+| Optional field added | `info` |
 
-**Policy modes:** `strict` (warnings become breaking), `lenient` (breaking demoted to warning), `backward_compatible`, `forward_compatible`.
+**Policy modes:** `strict`, `lenient`, `backward_compatible`, `forward_compatible`. Full rules: [docs/policy-rules.md](docs/policy-rules.md).
 
 ## CI Integration
 
 ```yaml
 # .github/workflows/drift-check.yml
-- name: Install DriftGuard
-  run: pip install driftguard-contracts
-
-- name: Check for drift
-  run: driftguard check --baseline baseline --current current
-
-- name: Generate report
+- run: pip install driftguard-contracts
+- run: driftguard check --baseline baseline --current current
+- run: driftguard report -b baseline -c current -f pr -o comment.md
   if: always()
-  run: driftguard report -b baseline -c current -f markdown -o drift-report.md
-
-- name: Upload report
-  if: always()
-  uses: actions/upload-artifact@v4
-  with:
-    name: drift-report
-    path: drift-report.md
 ```
 
-## Architecture
+PR comment format, step summary, annotations: [docs/github-actions.md](docs/github-actions.md).
 
-```
-Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
-                                                     │
-                                              Diff Engine
-                                                     │
-                                             Policy Engine
-                                                     │
-                                         Reporters / CI Gate
-```
+## Why DriftGuard?
 
-| Layer | Responsibility |
-|---|---|
-| **Collectors** | Extract schema from Postgres, MySQL, SQLite, OpenAPI, JSON, CSV, YAML |
-| **Schema** | Normalize all sources into `ContractSnapshot` → `ResourceSchema` → `FieldDef` |
-| **Diff Engine** | Semantic comparison: rename detection, type/nullable/enum/constraint changes |
-| **Policy Engine** | Classify each change as breaking / warning / info with configurable modes |
-| **Reporters** | Terminal (Rich), JSON, Markdown, HTML |
-| **CLI** | `init`, `snapshot`, `diff`, `check`, `report`, `config`, `snapshots`, `openapi diff` |
+Most schema tools focus on **one layer**. DriftGuard works **across layers** — a Postgres column rename breaks a downstream CSV export, an API field removal crashes a mobile app.
+
+It is a **contract drift detector**: snapshot, compare, classify, gate.
+
+**Not** a linter, migration tool, or runtime monitor.
 
 ## Testing
 
@@ -270,63 +144,35 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 576 tests | 89% coverage | Python 3.11 / 3.12 / 3.13
 ```
 
-| Suite | Count | What it covers |
-|---|---|---|
-| Diff engine | 29 | Field add/remove/rename, type/nullable/enum/constraint changes |
-| OpenAPI diff | 69 | Path/method/parameter/body/status, golden tests |
-| Nested/JSONB diff | 67 | Shape inference, nested diff, edge cases, JSONB collector |
-| Policy engine | 33 | Risk classification, policy modes, FK/PK/index/constraint events |
-| Schema models | 22 | Pydantic models, serialization roundtrips, backward compat |
-| Config | 17 | Load/save/validate, migration, notification settings |
-| Store / backends | 48 | Local + S3, checksum, export/import, cleanup, registry |
-| Reporters | 19 | Terminal, JSON, Markdown, HTML, PR comment |
-| CLI | 26 | All commands, demo formats, edge cases, error handling |
-| Collectors | 79 | PostgreSQL, OpenAPI, JSON, CSV, SQLite, YAML, Sequelize, Prisma |
-| Suppression/Waiver | 40 | Matching, expiry, CRUD, validation |
-| Registry | 14 | Publish, pull, list, impact analysis |
-| Golden tests | 22 | Snapshot pairs with expected breaking/warning/info counts |
-
 ```bash
-pytest                                    # run all
-pytest tests/unit/test_diff_engine.py -v  # single file
-pytest --cov=driftguard                   # with coverage
+pytest                        # run all
+pytest --cov=driftguard       # with coverage
 ```
 
 ## Development
 
 ```bash
-pip install -e ".[dev]"       # install in dev mode
-pytest                        # 576 tests
-ruff check src/ tests/        # lint
-ruff format src/ tests/       # format
-mypy src/                     # type check
+pip install -e ".[dev]"
+pytest && ruff check src/ tests/ && mypy src/
 ```
 
 ## Documentation
 
-- [Quick Start](docs/quickstart.md) — Get running in 5 minutes
-- [CLI Usage](docs/cli-usage.md) — Detailed command reference
-- [CI Gate](docs/ci-gate.md) — CI/CD integration (GitHub Actions, GitLab CI)
-- [GitHub Actions](docs/github-actions.md) — PR comments, step summary, annotations, SARIF
-- [Policy Rules](docs/policy-rules.md) — Risk classification rules and overrides
-- [Supported Sources](docs/supported-sources.md) — All collectors and config examples
-- [Architecture](docs/architecture.md) — System design and module responsibilities
-- [Writing Adapters](docs/adapters.md) — Guide to adding new source collectors
-- [FAQ](docs/faq.md) — Common questions answered
-- [Troubleshooting](docs/troubleshooting.md) — Debug tips and known limitations
-- [Verification Report](docs/verification.md) — Real CLI outputs proving each feature works
-- [CHANGELOG](CHANGELOG.md) — Release history
-- [ROADMAP](ROADMAP.md) — Planned features
-
-### Case Studies
-
-- [OpenAPI Response Field Removed](docs/case-studies/openapi-field-removed.md)
-- [PostgreSQL Column Type Changed](docs/case-studies/postgres-type-changed.md)
-- [CSV Export Column Renamed](docs/case-studies/csv-column-renamed.md)
+- [Quick Start](docs/quickstart.md) — 5-minute setup
+- [CLI Usage](docs/cli-usage.md) — Command reference
+- [Supported Sources](docs/supported-sources.md) — Collectors, stability matrix
+- [Policy Rules](docs/policy-rules.md) — Risk classification and overrides
+- [JSONB/Nested Diff](docs/jsonb-nested-diff.md) — Nested contract diffing
+- [GitHub Actions](docs/github-actions.md) — PR comments, annotations
+- [CI Gate](docs/ci-gate.md) — CI/CD integration
+- [Architecture](docs/architecture.md) — System design
+- [Writing Adapters](docs/adapters.md) — Custom collectors
+- [Verification Report](docs/verification.md) — Real CLI outputs
+- [FAQ](docs/faq.md) | [Troubleshooting](docs/troubleshooting.md) | [CHANGELOG](CHANGELOG.md) | [ROADMAP](ROADMAP.md)
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, testing, and PR guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
