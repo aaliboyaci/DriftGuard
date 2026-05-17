@@ -5,7 +5,7 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v0.4.0
+## [0.4.0] - 2026-05-17
 
 ### Added
 - **Nested schema models:** `NestedContract`, `NestedResource`, `NestedField` with dot-path notation (`payload.items[].sku`), array/map/wildcard support
@@ -19,7 +19,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Nested diff events:** NestedFieldAdded, NestedFieldRemoved, NestedFieldTypeChanged, NestedFieldRequiredChanged, NestedFieldNullableChanged, NestedEnumValuesChanged
 - **Nested diff engine:** path add/remove/type/required/nullable/enum detection with confidence pass-through
 - **Nested policy rules:** high-confidence removed = breaking, low-confidence = warning, required added = breaking, optional added = info, enum removed = breaking
-- 20 nested diff tests (408 total)
+- 20 nested diff tests
+- **CLI:** `driftguard nested infer` and `driftguard nested diff` commands with all format/output/filter options
+- `examples/jsonb-nested-demo/` with work order baseline/current samples and reports
+- Tests: 322 → 408
 
 ## [0.3.2] - 2026-05-17
 

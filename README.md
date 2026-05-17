@@ -135,6 +135,28 @@ The `pr` format generates compact Markdown for GitHub PR comments with collapsib
 </details>
 ```
 
+## Nested / JSONB Contract Diff
+
+Infer shape from JSON samples and diff nested contracts:
+
+```bash
+driftguard nested infer samples.json --output baseline.json
+# ... payload changes ...
+driftguard nested infer new-samples.json --output current.json
+driftguard nested diff baseline.json current.json
+```
+
+Catches nested field removals, type changes, required additions, and enum drift with confidence-aware severity:
+
+```
+BREAKING   work_orders.machine.location removed (confidence: 1.0)
+BREAKING   work_orders.steps[].timeout removed (confidence: 1.0)
+WARNING    work_orders.metadata.notes removed (confidence: 0.33)
+BREAKING   work_orders.assignee added (required, confidence: 1.0)
+```
+
+High confidence (>=0.8) removals = breaking. Low confidence = warning. No raw values stored — only shape.
+
 ## Installation
 
 ```bash
