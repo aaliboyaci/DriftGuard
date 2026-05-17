@@ -9,7 +9,7 @@ Catch breaking data contract changes before production.
 [![Tests](https://img.shields.io/badge/tests-576%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](#testing)
 
-DriftGuard snapshots your schemas, compares them semantically, classifies each change by risk, and fails CI when something breaks.
+DriftGuard snapshots your schemas, compares them semantically, classifies each change by risk, and fails CI when something breaks. Supports APIs, databases, files, and nested JSON payloads — with event stream support planned.
 
 ```
 1. Detect breaking contract changes

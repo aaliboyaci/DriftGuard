@@ -15,6 +15,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `docs/verification.md` — real CLI outputs proving each feature works
 
 ### Changed
+- `pyarrow` moved from core dependency to optional `[parquet]` extra
+- README: "event streams" claim corrected to "planned"
 - **Post-release audit:** corrected stability claims and test metrics
 - Parquet collector moved from Beta to Planned (enum only, no implementation)
 - SBOM/signed release tasks marked as not implemented
