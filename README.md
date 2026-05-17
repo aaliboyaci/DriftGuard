@@ -314,6 +314,7 @@ mypy src/                     # type check
 - [Writing Adapters](docs/adapters.md) — Guide to adding new source collectors
 - [FAQ](docs/faq.md) — Common questions answered
 - [Troubleshooting](docs/troubleshooting.md) — Debug tips and known limitations
+- [Verification Report](docs/verification.md) — Real CLI outputs proving each feature works
 - [CHANGELOG](CHANGELOG.md) — Release history
 - [ROADMAP](ROADMAP.md) — Planned features
 

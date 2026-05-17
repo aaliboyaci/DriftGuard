@@ -12,6 +12,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `driftguard snapshots import` — import snapshot from .json or .json.gz file
 - `driftguard snapshots cleanup` — remove old snapshots, keep N most recent
 - 8 new CLI tests for export/import/cleanup commands (576 total)
+- `docs/verification.md` — real CLI outputs proving each feature works
 
 ### Changed
 - **Post-release audit:** corrected stability claims and test metrics
