@@ -6,8 +6,8 @@ Catch breaking data contract changes before production.
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/driftguard-contracts.svg)](https://pypi.org/project/driftguard-contracts/)
-[![Tests](https://img.shields.io/badge/tests-310%20passed-brightgreen.svg)](#testing)
-[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-568%20passed-brightgreen.svg)](#testing)
+[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](#testing)
 
 DriftGuard is a Python CLI for detecting schema drift and breaking contract changes across APIs, databases, files, and event streams.
 
@@ -196,9 +196,10 @@ It is a **contract drift detector**: snapshot, compare, classify, gate.
 
 ## Supported Sources
 
-**Stable:** PostgreSQL, MySQL, SQLite, OpenAPI 3.x/Swagger 2.x, JSON Schema, CSV  
-**Beta:** YAML  
-**Planned:** MongoDB, Kafka/Avro/Protobuf  
+**Stable:** PostgreSQL, MySQL, SQLite, OpenAPI 3.x/Swagger 2.x, JSON Schema, CSV, JSONB nested diff  
+**Beta:** YAML, Sequelize, Prisma, S3 backend, Suppression/Waiver  
+**Experimental:** Cross-service registry  
+**Planned:** Parquet, MongoDB, Kafka/Avro/Protobuf  
 
 See [docs/supported-sources.md](docs/supported-sources.md) for full details.
 
@@ -266,19 +267,23 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 ## Testing
 
 ```
-310 tests | 85% coverage | Python 3.11 / 3.12 / 3.13
+568 tests | 89% coverage | Python 3.11 / 3.12 / 3.13
 ```
 
 | Suite | Count | What it covers |
 |---|---|---|
 | Diff engine | 29 | Field add/remove/rename, type/nullable/enum/constraint changes |
+| OpenAPI diff | 69 | Path/method/parameter/body/status, golden tests |
+| Nested/JSONB diff | 67 | Shape inference, nested diff, edge cases, JSONB collector |
 | Policy engine | 33 | Risk classification, policy modes, FK/PK/index/constraint events |
 | Schema models | 22 | Pydantic models, serialization roundtrips, backward compat |
 | Config | 17 | Load/save/validate, migration, notification settings |
-| Store | 17 | Save/load/delete, checksum, export/import, cleanup |
-| Reporters | 7 | Terminal, JSON, Markdown, HTML output |
+| Store / backends | 48 | Local + S3, checksum, export/import, cleanup, registry |
+| Reporters | 19 | Terminal, JSON, Markdown, HTML, PR comment |
 | CLI | 26 | All commands, demo formats, edge cases, error handling |
-| Collectors | 18 | PostgreSQL, OpenAPI, JSON Schema, CSV, SQLite |
+| Collectors | 79 | PostgreSQL, OpenAPI, JSON, CSV, SQLite, YAML, Sequelize, Prisma |
+| Suppression/Waiver | 40 | Matching, expiry, CRUD, validation |
+| Registry | 14 | Publish, pull, list, impact analysis |
 | Golden tests | 22 | Snapshot pairs with expected breaking/warning/info counts |
 
 ```bash
@@ -291,7 +296,7 @@ pytest --cov=driftguard                   # with coverage
 
 ```bash
 pip install -e ".[dev]"       # install in dev mode
-pytest                        # 310 tests
+pytest                        # 568 tests
 ruff check src/ tests/        # lint
 ruff format src/ tests/       # format
 mypy src/                     # type check

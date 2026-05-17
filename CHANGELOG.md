@@ -5,6 +5,17 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-05-17
+
+### Changed
+- **Post-release audit:** corrected stability claims and test metrics
+- Parquet collector moved from Beta to Planned (enum only, no implementation)
+- SBOM/signed release tasks marked as not implemented
+- README badges updated: 568 tests, 89% coverage (were showing 310/85%)
+- Added full stability matrix to `docs/supported-sources.md`
+- Stability tiers added to README: Stable / Beta / Experimental / Planned
+- Test suite table in README updated to reflect actual 568-test breakdown
+
 ## [1.0.0] - 2026-05-17
 
 ### Milestone
@@ -12,18 +23,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Snapshot format frozen** — backward compatible with all v0.x snapshots
 - **Security review complete** — `docs/security-review.md`
 - **Migration guide** — `docs/migration-guide.md`
-- 568 tests | 85% coverage | Python 3.11/3.12/3.13
+- 568 tests | 89% coverage | Python 3.11/3.12/3.13
 
 ### Stable Features
 - OpenAPI deep diff (path/method/parameter/body/status)
 - JSONB/nested contract diff with confidence scoring
+- PostgreSQL, MySQL, SQLite, CSV, JSON Schema collectors
+- Diff engine with rename detection and constraint diffing
+- Policy engine with 4 modes: strict/lenient/backward/forward compatible
+- Reporters: terminal (Rich), JSON, Markdown, HTML, PR comment
+- Local snapshot store with checksum, export/import, retention
+
+### Beta Features
 - Sequelize + Prisma ORM collectors
-- PostgreSQL, MySQL, SQLite, CSV, YAML collectors
+- YAML collector
 - Suppression (.driftguardignore) + Waiver system
 - Remote snapshot backend (S3-compatible)
+
+### Experimental Features
 - Cross-service contract registry with impact analysis
-- PR comment reporter with truncation
-- Policy modes: strict/lenient/backward/forward compatible
+
+### Not Yet Implemented
+- Parquet collector (enum defined, no code)
+- Signed releases / SBOM generation
 
 ## [0.8.0] - 2026-05-17
 
