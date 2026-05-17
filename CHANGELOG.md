@@ -5,6 +5,26 @@ All notable changes to DriftGuard will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-05-17
+
+### Milestone
+- **Public API frozen** — all stable modules documented in `docs/public-api.md`
+- **Snapshot format frozen** — backward compatible with all v0.x snapshots
+- **Security review complete** — `docs/security-review.md`
+- **Migration guide** — `docs/migration-guide.md`
+- 568 tests | 85% coverage | Python 3.11/3.12/3.13
+
+### Stable Features
+- OpenAPI deep diff (path/method/parameter/body/status)
+- JSONB/nested contract diff with confidence scoring
+- Sequelize + Prisma ORM collectors
+- PostgreSQL, MySQL, SQLite, CSV, YAML collectors
+- Suppression (.driftguardignore) + Waiver system
+- Remote snapshot backend (S3-compatible)
+- Cross-service contract registry with impact analysis
+- PR comment reporter with truncation
+- Policy modes: strict/lenient/backward/forward compatible
+
 ## [0.8.0] - 2026-05-17
 
 ### Added
