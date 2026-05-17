@@ -414,6 +414,62 @@ def snapshots_delete(
         raise typer.Exit(1)
 
 
+@snapshots_app.command("export")
+def snapshots_export(
+    name: str = typer.Option(..., "--name", "-n", help="Snapshot name to export"),
+    output: str = typer.Option(..., "--output", "-o", help="Output file path"),
+    compress: bool = typer.Option(False, "--compress", "-z", help="Gzip compress the output"),
+    config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Export a snapshot to a file, optionally gzip-compressed."""
+    cfg = _load_config(config)
+    store = LocalStore(cfg.snapshot_dir)
+    try:
+        out_path = store.export_snapshot(name, output, compress=compress)
+        console.print(f"[green]Exported snapshot '{name}' to {out_path}[/green]")
+    except FileNotFoundError:
+        console.print(f"[red]Snapshot not found: {name}[/red]")
+        raise typer.Exit(1) from None
+
+
+@snapshots_app.command("import")
+def snapshots_import(
+    input_file: str = typer.Argument(..., help="Snapshot file to import (.json or .json.gz)"),
+    config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Import a snapshot from a file (supports gzip)."""
+    cfg = _load_config(config)
+    store = LocalStore(cfg.snapshot_dir)
+    try:
+        snap = store.import_snapshot(input_file)
+        console.print(
+            f"[green]Imported snapshot '{snap.name}' ({len(snap.resources)} resources)[/green]"
+        )
+    except FileNotFoundError:
+        console.print(f"[red]File not found: {input_file}[/red]")
+        raise typer.Exit(1) from None
+    except Exception as e:
+        console.print(f"[red]Import failed: {e}[/red]")
+        raise typer.Exit(1) from None
+
+
+@snapshots_app.command("cleanup")
+def snapshots_cleanup(
+    keep: int = typer.Option(5, "--keep", "-k", help="Number of most recent snapshots to keep"),
+    config: str = typer.Option("driftguard.yaml", "--config", "-c", help="Config file path"),
+) -> None:
+    """Remove old snapshots, keeping only the N most recent."""
+    cfg = _load_config(config)
+    store = LocalStore(cfg.snapshot_dir)
+    removed = store.cleanup(keep=keep)
+    if removed:
+        console.print(f"[green]Removed {len(removed)} snapshot(s):[/green]")
+        for name in removed:
+            console.print(f"  - {name}")
+    else:
+        console.print("[dim]No snapshots to remove.[/dim]")
+
+
 @openapi_app.command("diff")
 def openapi_diff(
     baseline: str = typer.Argument(..., help="Baseline OpenAPI spec file"),

@@ -7,14 +7,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.1] - 2026-05-17
 
+### Added
+- `driftguard snapshots export` — export snapshot to file, with optional gzip compression
+- `driftguard snapshots import` — import snapshot from .json or .json.gz file
+- `driftguard snapshots cleanup` — remove old snapshots, keep N most recent
+- 8 new CLI tests for export/import/cleanup commands (576 total)
+
 ### Changed
 - **Post-release audit:** corrected stability claims and test metrics
 - Parquet collector moved from Beta to Planned (enum only, no implementation)
 - SBOM/signed release tasks marked as not implemented
-- README badges updated: 568 tests, 89% coverage (were showing 310/85%)
+- README badges updated: 576 tests, 89% coverage
 - Added full stability matrix to `docs/supported-sources.md`
 - Stability tiers added to README: Stable / Beta / Experimental / Planned
-- Test suite table in README updated to reflect actual 568-test breakdown
+- Test suite table in README updated to reflect actual test breakdown
+- 77 false checkboxes in tasks.md Faz 10-29 corrected
 
 ## [1.0.0] - 2026-05-17
 

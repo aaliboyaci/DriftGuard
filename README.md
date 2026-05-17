@@ -6,7 +6,7 @@ Catch breaking data contract changes before production.
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/driftguard-contracts.svg)](https://pypi.org/project/driftguard-contracts/)
-[![Tests](https://img.shields.io/badge/tests-568%20passed-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-576%20passed-brightgreen.svg)](#testing)
 [![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](#testing)
 
 DriftGuard is a Python CLI for detecting schema drift and breaking contract changes across APIs, databases, files, and event streams.
@@ -267,7 +267,7 @@ Data Sources ──> Collectors ──> Normalizer ──> Snapshot Store
 ## Testing
 
 ```
-568 tests | 89% coverage | Python 3.11 / 3.12 / 3.13
+576 tests | 89% coverage | Python 3.11 / 3.12 / 3.13
 ```
 
 | Suite | Count | What it covers |
@@ -296,7 +296,7 @@ pytest --cov=driftguard                   # with coverage
 
 ```bash
 pip install -e ".[dev]"       # install in dev mode
-pytest                        # 568 tests
+pytest                        # 576 tests
 ruff check src/ tests/        # lint
 ruff format src/ tests/       # format
 mypy src/                     # type check

@@ -556,3 +556,181 @@ class TestOpenApiDiffCommand:
         result = runner.invoke(app, ["openapi", "diff", spec, spec])
         assert result.exit_code == 0
         assert "safe" in result.stdout.lower() or "No breaking" in result.stdout
+
+
+class TestSnapshotsExportCommand:
+    def _setup(self, tmp_path: Path) -> tuple[Path, str]:
+        snap_dir = tmp_path / "snapshots"
+        store = LocalStore(snap_dir)
+        snap = ContractSnapshot(
+            name="test-snap",
+            resources=[
+                ResourceSchema(
+                    name="t",
+                    source_type=SourceType.POSTGRES,
+                    fields=[FieldDef(name="id", field_type="integer")],
+                )
+            ],
+        )
+        store.save(snap)
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        return config_path, "test-snap"
+
+    def test_export_json(self, tmp_path: Path) -> None:
+        config_path, name = self._setup(tmp_path)
+        output = tmp_path / "exported.json"
+        result = runner.invoke(
+            app, ["snapshots", "export", "-n", name, "-o", str(output), "--config", str(config_path)]
+        )
+        assert result.exit_code == 0
+        assert "Exported" in result.stdout
+        assert output.exists()
+        import json
+
+        data = json.loads(output.read_text(encoding="utf-8"))
+        assert data["name"] == "test-snap"
+
+    def test_export_compressed(self, tmp_path: Path) -> None:
+        config_path, name = self._setup(tmp_path)
+        output = tmp_path / "exported.json.gz"
+        result = runner.invoke(
+            app, ["snapshots", "export", "-n", name, "-o", str(output), "--compress", "--config", str(config_path)]
+        )
+        assert result.exit_code == 0
+        assert output.exists()
+        import gzip
+
+        content = gzip.decompress(output.read_bytes())
+        assert b"test-snap" in content
+
+    def test_export_missing_snapshot(self, tmp_path: Path) -> None:
+        snap_dir = tmp_path / "snapshots"
+        snap_dir.mkdir()
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(
+            app, ["snapshots", "export", "-n", "nonexistent", "-o", str(tmp_path / "out.json"), "--config", str(config_path)]
+        )
+        assert result.exit_code == 1
+        assert "not found" in result.stdout.lower()
+
+
+class TestSnapshotsImportCommand:
+    def test_import_json(self, tmp_path: Path) -> None:
+        snap_dir = tmp_path / "snapshots"
+        store = LocalStore(snap_dir)
+        # Create and export a snapshot manually
+        snap = ContractSnapshot(
+            name="imported",
+            resources=[
+                ResourceSchema(
+                    name="t",
+                    source_type=SourceType.POSTGRES,
+                    fields=[FieldDef(name="id", field_type="integer")],
+                )
+            ],
+        )
+        export_file = tmp_path / "snap.json"
+        export_file.write_text(snap.model_dump_json(indent=2), encoding="utf-8")
+
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+
+        result = runner.invoke(app, ["snapshots", "import", str(export_file), "--config", str(config_path)])
+        assert result.exit_code == 0
+        assert "Imported" in result.stdout
+        assert "imported" in result.stdout
+        # Verify actually saved
+        assert store.exists("imported")
+
+    def test_import_compressed(self, tmp_path: Path) -> None:
+        import gzip
+
+        snap_dir = tmp_path / "snapshots"
+        snap = ContractSnapshot(
+            name="gz-snap",
+            resources=[
+                ResourceSchema(
+                    name="t",
+                    source_type=SourceType.POSTGRES,
+                    fields=[FieldDef(name="id", field_type="integer")],
+                )
+            ],
+        )
+        gz_file = tmp_path / "snap.json.gz"
+        gz_file.write_bytes(gzip.compress(snap.model_dump_json().encode("utf-8")))
+
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+
+        result = runner.invoke(app, ["snapshots", "import", str(gz_file), "--config", str(config_path)])
+        assert result.exit_code == 0
+        assert "gz-snap" in result.stdout
+
+    def test_import_missing_file(self, tmp_path: Path) -> None:
+        config = DriftGuardConfig(snapshot_dir=str(tmp_path / "snaps"))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+        result = runner.invoke(app, ["snapshots", "import", "/nonexistent.json", "--config", str(config_path)])
+        assert result.exit_code == 1
+        assert "not found" in result.stdout.lower()
+
+
+class TestSnapshotsCleanupCommand:
+    def test_cleanup_removes_old(self, tmp_path: Path) -> None:
+        import time
+
+        snap_dir = tmp_path / "snapshots"
+        store = LocalStore(snap_dir)
+        # Create 4 snapshots with slight time gaps
+        for i in range(4):
+            snap = ContractSnapshot(
+                name=f"snap-{i}",
+                resources=[
+                    ResourceSchema(
+                        name="t",
+                        source_type=SourceType.POSTGRES,
+                        fields=[FieldDef(name="id", field_type="integer")],
+                    )
+                ],
+            )
+            store.save(snap)
+            time.sleep(0.05)
+
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+
+        result = runner.invoke(app, ["snapshots", "cleanup", "--keep", "2", "--config", str(config_path)])
+        assert result.exit_code == 0
+        assert "Removed 2" in result.stdout
+        # Only 2 remain
+        assert len(store.list_snapshots()) == 2
+
+    def test_cleanup_nothing_to_remove(self, tmp_path: Path) -> None:
+        snap_dir = tmp_path / "snapshots"
+        store = LocalStore(snap_dir)
+        snap = ContractSnapshot(
+            name="only-one",
+            resources=[
+                ResourceSchema(
+                    name="t",
+                    source_type=SourceType.POSTGRES,
+                    fields=[FieldDef(name="id", field_type="integer")],
+                )
+            ],
+        )
+        store.save(snap)
+
+        config = DriftGuardConfig(snapshot_dir=str(snap_dir))
+        config_path = tmp_path / "driftguard.yaml"
+        save_config(config, config_path)
+
+        result = runner.invoke(app, ["snapshots", "cleanup", "--keep", "5", "--config", str(config_path)])
+        assert result.exit_code == 0
+        assert "No snapshots to remove" in result.stdout
